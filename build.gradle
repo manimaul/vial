@@ -1,0 +1,53 @@
+buildscript {
+    ext.kotlin_version = '1.2.30'
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'kotlin'
+
+    repositories {
+        jcenter()
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    dependencies {
+        implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version
+        implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
+        implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: kotlin_version
+        implementation group: 'com.google.guava', name: 'guava', version: guava_version
+        implementation group: 'com.typesafe', name: 'config', version: typesafe_config_version
+        implementation group: 'io.netty', name: 'netty-all', version: netty_version
+        implementation group: 'io.netty', name: 'netty-tcnative-boringssl-static', version: netty_tcnative_version
+        implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
+        implementation group: 'ch.qos.logback', name: 'logback-core', version: logback_version
+
+        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jackson_version
+        implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jackson_version
+        implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jackson_version
+        implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jackson_version
+
+        testImplementation group: 'junit', name: 'junit', version: junit_version
+        testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrest_version
+    }
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.7'
+}

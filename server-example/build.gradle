@@ -1,0 +1,8 @@
+apply plugin: 'application'
+
+mainClassName = 'com.willkamp.vial.example.Main'
+
+dependencies {
+    implementation project(':server')
+    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: groovy_version
+}
