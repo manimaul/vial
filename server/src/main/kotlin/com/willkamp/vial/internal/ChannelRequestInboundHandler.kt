@@ -26,7 +26,6 @@ internal class ChannelRequestInboundHandler internal constructor(
                         .buildH1()
             } ?: ResponseBuilder(ctx.alloc())
                     .setStatus(HttpResponseStatus.NOT_FOUND)
-                    .setBody(Unpooled.EMPTY_BUFFER)
                     .buildH1()
             log.debug("write flushing response $response")
             ctx.writeAndFlush(response)

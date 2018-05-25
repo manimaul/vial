@@ -9,6 +9,7 @@ import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.*
+import io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE
 import io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT
 import io.netty.handler.codec.http2.DefaultHttp2Headers
 import io.netty.handler.codec.http2.Http2Headers
@@ -17,6 +18,11 @@ import java.io.IOException
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.util.*
+
+val TEXT_HTML = AsciiString.cached("text/html")!!
+val TEXT_PLAIN = AsciiString.cached("text/plain")!!
+val JSON = AsciiString.cached("application/json")!!
+
 
 class ResponseBuilder(
         private val allocator: ByteBufAllocator
@@ -35,15 +41,26 @@ class ResponseBuilder(
     private var body: ByteBuf? = null
     private var headers: MutableMap<AsciiString, AsciiString>? = null
 
+    // region API ------------------------------------------------------------------------------------------------------
+
     fun setStatus(status: HttpResponseStatus): ResponseBuilder {
         this.status = status
         return this
     }
 
-    fun setBody(body: String): ResponseBuilder {
+    fun setHtml(body: String) : ResponseBuilder {
         val bytes = body.toByteArray(StandardCharsets.UTF_8)
         this.body = Unpooled.copiedBuffer(bytes)
-        addHeader(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN)
+        addHeader(CONTENT_TYPE, TEXT_HTML)
+        setStatusIfNotSet(HttpResponseStatus.OK)
+        return this
+    }
+
+    fun setPlainText(body: String): ResponseBuilder {
+        val bytes = body.toByteArray(StandardCharsets.UTF_8)
+        this.body = Unpooled.copiedBuffer(bytes)
+        addHeader(CONTENT_TYPE, TEXT_PLAIN)
+        setStatusIfNotSet(HttpResponseStatus.OK)
         return this
     }
 
@@ -53,12 +70,18 @@ class ResponseBuilder(
     }
 
     @Throws(IOException::class)
-    fun setBody(pojo: Any): ResponseBuilder {
+    fun setJson(pojo: Any): ResponseBuilder {
         val byteBuf = allocator.directBuffer()
         val stream: OutputStream = ByteBufOutputStream(byteBuf)
         MAPPER.writeValue(stream, pojo)
         body = byteBuf
+        addHeader(CONTENT_TYPE, JSON)
+        setStatusIfNotSet(HttpResponseStatus.OK)
         return this
+    }
+
+    fun addHeader(key: String, value: String): ResponseBuilder {
+        return addHeader(AsciiString.of(key), AsciiString.of(value))
     }
 
     fun addHeader(key: AsciiString, value: AsciiString): ResponseBuilder {
@@ -67,6 +90,16 @@ class ResponseBuilder(
         }
         headers!![key] = value
         return this
+    }
+
+    // endregion
+
+    // region INTERNAL -------------------------------------------------------------------------------------------------
+
+    private fun setStatusIfNotSet(status: HttpResponseStatus) {
+        if (this.status == null) {
+            this.status = status
+        }
     }
 
     internal fun buildH1(): FullHttpResponse {
@@ -93,4 +126,6 @@ class ResponseBuilder(
         http2Headers.setInt(HttpHeaderNames.CONTENT_LENGTH, buildBodyData().readableBytes())
         return http2Headers
     }
+
+    // endregion
 }

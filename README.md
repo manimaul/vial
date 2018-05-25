@@ -1,8 +1,8 @@
-package com.willkamp.vial.example
+# Vial
+### Simple Netty based http/1.1 and http/2 framework
 
-import com.willkamp.vial.api.Server
-import org.slf4j.LoggerFactory
-
+Example
+```kotlin
 private val log = LoggerFactory.getLogger(Main::class.java)
 
 data class Response(val message: String = "OK")
@@ -18,3 +18,4 @@ object Main {
                 }).serve()
     }
 }
+```

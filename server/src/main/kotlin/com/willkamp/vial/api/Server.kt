@@ -15,9 +15,9 @@ import javax.net.ssl.SSLException
 private val log = LoggerFactory.getLogger(Server::class.java)
 
 class Server(
-        private val port: Int,
-        private val useTls: Boolean,
-        private val h2Capable: Boolean
+        private val port: Int = 8080,
+        private val useTls: Boolean = false,
+        private val h2Capable: Boolean = false
 ) {
 
     private val handlers = mutableMapOf<String, RequestHandler>()
@@ -64,7 +64,7 @@ class Server(
     //todo: other methods
 
     @Throws(InterruptedException::class, CertificateException::class, SSLException::class)
-    fun start() {
+    fun serve() {
         val config = ChannelConfig()
         try {
             val bootstrap = ServerBootstrap()
