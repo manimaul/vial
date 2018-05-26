@@ -1,4 +1,4 @@
-rootProject.name = 'netty-flask'
+rootProject.name = 'vial'
 include 'server'
 include 'server-example'
 

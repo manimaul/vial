@@ -9,6 +9,14 @@ buildscript {
     }
 }
 
+plugins {
+    id 'net.researchgate.release' version '2.7.0'
+}
+
+release {
+    tagTemplate = 'v${version}'
+}
+
 allprojects {
     apply plugin: 'java'
     apply plugin: 'kotlin'
@@ -47,6 +55,8 @@ allprojects {
         kotlinOptions.jvmTarget = "1.8"
     }
 }
+
+afterReleaseBuild.dependsOn server:uploadArchives
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.7'
