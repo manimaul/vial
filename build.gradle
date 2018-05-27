@@ -56,7 +56,7 @@ allprojects {
     }
 }
 
-afterReleaseBuild.dependsOn server:uploadArchives
+afterReleaseBuild.dependsOn ':server:bintrayUpload'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.7'
