@@ -1,7 +1,18 @@
 # Vial
 ### Simple Netty based http/1.1 and http/2 framework
 
-Example
+### Gradle
+```groovy
+repositories {
+    maven { url  "https://dl.bintray.com/madrona/maven" }
+}
+
+dependencies {
+    implementation group: 'com.willkamp', name: 'vial-server', version: '0.0.2'
+}
+```
+
+### Example
 ```kotlin
 private val log = LoggerFactory.getLogger(Main::class.java)
 
