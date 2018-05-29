@@ -9,8 +9,8 @@ import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.*
-import io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE
-import io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT
+import io.netty.handler.codec.http.HttpHeaderNames.*
+import io.netty.handler.codec.http.HttpResponseStatus.OK
 import io.netty.handler.codec.http2.DefaultHttp2Headers
 import io.netty.handler.codec.http2.Http2Headers
 import io.netty.util.AsciiString
@@ -30,7 +30,7 @@ class ResponseBuilder(
 
     companion object {
 
-        private val USER_AGENT_VALUE = AsciiString.of("vial of netty")
+        private val SERVER_VALUE = AsciiString.of("vial")
         private val MAPPER: ObjectMapper = ObjectMapper()
                 .registerModule(ParameterNamesModule())
                 .registerModule(Jdk8Module())
@@ -52,7 +52,6 @@ class ResponseBuilder(
         val bytes = body.toByteArray(StandardCharsets.UTF_8)
         this.body = Unpooled.copiedBuffer(bytes)
         addHeader(CONTENT_TYPE, TEXT_HTML)
-        setStatusIfNotSet(HttpResponseStatus.OK)
         return this
     }
 
@@ -60,7 +59,6 @@ class ResponseBuilder(
         val bytes = body.toByteArray(StandardCharsets.UTF_8)
         this.body = Unpooled.copiedBuffer(bytes)
         addHeader(CONTENT_TYPE, TEXT_PLAIN)
-        setStatusIfNotSet(HttpResponseStatus.OK)
         return this
     }
 
@@ -76,7 +74,6 @@ class ResponseBuilder(
         MAPPER.writeValue(stream, pojo)
         body = byteBuf
         addHeader(CONTENT_TYPE, JSON)
-        setStatusIfNotSet(HttpResponseStatus.OK)
         return this
     }
 
@@ -96,16 +93,10 @@ class ResponseBuilder(
 
     // region INTERNAL -------------------------------------------------------------------------------------------------
 
-    private fun setStatusIfNotSet(status: HttpResponseStatus) {
-        if (this.status == null) {
-            this.status = status
-        }
-    }
-
-    internal fun buildH1(): FullHttpResponse {
-        val status = checkNotNull(status, { "HttpResponseStatus not set" })
+    internal fun buildFullH1Response(): FullHttpResponse {
+        val status = status ?: OK
         val response = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, buildBodyData())
-        response.headers().set(USER_AGENT, USER_AGENT_VALUE)
+        response.headers().set(SERVER, SERVER_VALUE)
         headers?.forEach { key, value -> response.headers().set(key, value) }
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, buildBodyData().readableBytes())
         return response
@@ -119,9 +110,10 @@ class ResponseBuilder(
     }
 
     internal fun buildH2Headers(): Http2Headers {
-        val status = checkNotNull(status, { "HttpResponseStatus not set" })
+        val status = status ?: OK
         val http2Headers = DefaultHttp2Headers()
         http2Headers.status(status.codeAsText())
+        http2Headers.set(SERVER, SERVER_VALUE)
         headers?.forEach({ name, value -> http2Headers.set(name, value) })
         http2Headers.setInt(HttpHeaderNames.CONTENT_LENGTH, buildBodyData().readableBytes())
         return http2Headers

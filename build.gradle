@@ -44,7 +44,8 @@ allprojects {
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jackson_version
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jackson_version
 
-        testImplementation group: 'junit', name: 'junit', version: junit_version
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junit_version
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: mockito_version
         testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrest_version
     }
 

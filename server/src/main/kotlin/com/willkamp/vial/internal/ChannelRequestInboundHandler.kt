@@ -23,10 +23,10 @@ internal class ChannelRequestInboundHandler internal constructor(
             val pathKey = "${msg.method().name()}_${msg.uri()}"
             val response = handlers[pathKey]?.let { handler ->
                 handler(ResponseBuilder(ctx.alloc()))
-                        .buildH1()
+                        .buildFullH1Response()
             } ?: ResponseBuilder(ctx.alloc())
                     .setStatus(HttpResponseStatus.NOT_FOUND)
-                    .buildH1()
+                    .buildFullH1Response()
             log.debug("write flushing response $response")
             ctx.writeAndFlush(response)
             return
