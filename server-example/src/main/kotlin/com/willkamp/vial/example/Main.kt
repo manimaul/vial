@@ -13,7 +13,12 @@ object Main {
         log.debug("starting example server")
 
         Server(port = 8080)
-                .get("/", { response ->
+                .get("/", { request, response ->
+                    log.debug("get request: $request")
+                    response.setHtml("""<html>hi<html""")
+                })
+                .post("/", { request, response ->
+                    log.debug("post request: $request")
                     response.setJson(pojo = Response())
                 }).serve()
     }

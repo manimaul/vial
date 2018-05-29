@@ -1,3 +1,3 @@
 package com.willkamp.vial.api
 
-typealias RequestHandler = (ResponseBuilder) -> ResponseBuilder
+typealias RequestHandler = (Request, ResponseBuilder) -> ResponseBuilder

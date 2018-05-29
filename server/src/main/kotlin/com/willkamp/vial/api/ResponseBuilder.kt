@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
+import com.willkamp.vial.internal.MAPPER
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.ByteBufOutputStream
@@ -31,10 +32,6 @@ class ResponseBuilder(
     companion object {
 
         private val SERVER_VALUE = AsciiString.of("vial")
-        private val MAPPER: ObjectMapper = ObjectMapper()
-                .registerModule(ParameterNamesModule())
-                .registerModule(Jdk8Module())
-                .registerModule(JavaTimeModule())
     }
 
     private var status: HttpResponseStatus? = null

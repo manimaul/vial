@@ -1,15 +1,17 @@
 package com.willkamp.vial.internal
 
 import com.google.common.collect.ImmutableMap
+import com.willkamp.vial.api.Request
 import com.willkamp.vial.api.RequestHandler
 import com.willkamp.vial.api.ResponseBuilder
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
 import io.netty.handler.codec.http2.*
 import io.netty.util.AttributeKey
-import java.util.*
+import kotlin.collections.HashMap
 
 internal class H2ConnectionHandler internal constructor(
         decoder: Http2ConnectionDecoder,
@@ -21,12 +23,26 @@ internal class H2ConnectionHandler internal constructor(
     companion object {
 
         private val HEADER_KEY = AttributeKey.newInstance<MutableMap<Int, Http2Headers>>("header_key")
+        private val COMP_KEY = AttributeKey.newInstance<MutableMap<Int, CompositeByteBuf>>("comp_key")
 
         private fun headersMap(ctx: ChannelHandlerContext): MutableMap<Int, Http2Headers> {
             return ctx.channel().attr(HEADER_KEY).get() ?: {
                 val map = HashMap<Int, Http2Headers>()
                 ctx.channel().attr(HEADER_KEY).set(map)
                 map
+            }()
+        }
+
+        private fun compositeByteBuf(ctx: ChannelHandlerContext, streamId: Int): CompositeByteBuf {
+            val map = ctx.channel().attr(COMP_KEY).get() ?: {
+                val map = HashMap<Int, CompositeByteBuf>()
+                ctx.channel().attr(COMP_KEY).set(map)
+                map
+            }()
+            return map[streamId] ?: {
+                val buf = ctx.alloc().compositeBuffer()
+                map[streamId] = buf
+                buf
             }()
         }
 
@@ -91,12 +107,12 @@ internal class H2ConnectionHandler internal constructor(
     }
 
     private fun sendResponse(ctx: ChannelHandlerContext,
-                             streamId: Int) {
-
+                             streamId: Int,
+                             requestBody: ByteBuf?) {
         val responseBuilder = getHeaders(ctx, streamId)?.let { headers ->
+            val request = Request(headers.path(), headers, requestBody)
             handler(headers)?.let { handler ->
-                handler(ResponseBuilder(ctx.alloc()))
-                //todo: add headers
+                handler(request, ResponseBuilder(ctx.alloc()))
             }
         } ?: errorResponseBuilder(ctx)
 
@@ -114,8 +130,11 @@ internal class H2ConnectionHandler internal constructor(
                             padding: Int,
                             endOfStream: Boolean): Int {
         val processed = data.readableBytes() + padding
+        data.retain(1)
+        val buf = compositeByteBuf(ctx, streamId)
+        buf.addComponent(data)
         if (endOfStream) {
-            sendResponse(ctx, streamId)
+            sendResponse(ctx, streamId, buf)
         }
         return processed
     }
@@ -127,7 +146,7 @@ internal class H2ConnectionHandler internal constructor(
                                endOfStream: Boolean) {
         setHeaders(ctx, streamId, headers)
         if (endOfStream) {
-            sendResponse(ctx, streamId)
+            sendResponse(ctx, streamId, compositeByteBuf(ctx, streamId))
         }
     }
 

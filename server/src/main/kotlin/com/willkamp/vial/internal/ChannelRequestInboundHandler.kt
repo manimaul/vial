@@ -1,6 +1,7 @@
 package com.willkamp.vial.internal
 
 import com.google.common.collect.ImmutableMap
+import com.willkamp.vial.api.Request
 import com.willkamp.vial.api.RequestHandler
 import com.willkamp.vial.api.ResponseBuilder
 import io.netty.buffer.Unpooled
@@ -21,8 +22,9 @@ internal class ChannelRequestInboundHandler internal constructor(
         log.debug("read $msg")
         if (msg is FullHttpRequest) {
             val pathKey = "${msg.method().name()}_${msg.uri()}"
+            val request = Request(msg.uri(), msg.headers() + msg.trailingHeaders(), msg.content())
             val response = handlers[pathKey]?.let { handler ->
-                handler(ResponseBuilder(ctx.alloc()))
+                handler(request, ResponseBuilder(ctx.alloc()))
                         .buildFullH1Response()
             } ?: ResponseBuilder(ctx.alloc())
                     .setStatus(HttpResponseStatus.NOT_FOUND)
