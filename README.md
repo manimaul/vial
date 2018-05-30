@@ -23,10 +23,16 @@ object Main {
     fun main(args: Array<String>) {
         log.debug("starting example server")
 
-        Server(port = 8080)
-                .get("/", { response ->
-                    response.setJson(pojo = Response())
-                }).serve()
+        VialServer()
+                .get("/", { request, response ->
+                    log.debug("get request: $request")
+                    response.setJson(pojo = Response(message = "hello from get"))
+                })
+                .post("/", { request, response ->
+                    log.debug("post request: $request")
+                    response.setJson(pojo = Response(message= "hello from post"))
+                })
+                .buildAndServe()
     }
 }
 ```
