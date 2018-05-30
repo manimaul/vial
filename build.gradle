@@ -35,6 +35,8 @@ allprojects {
         implementation group: 'com.google.guava', name: 'guava', version: guava_version
         implementation group: 'com.typesafe', name: 'config', version: typesafe_config_version
         implementation group: 'io.netty', name: 'netty-all', version: netty_version
+        implementation group:'io.netty', name: 'netty-transport-native-epoll', version: netty_version
+        implementation group:'io.netty', name: 'netty-transport-native-kqueue', version: netty_version
         implementation group: 'io.netty', name: 'netty-tcnative-boringssl-static', version: netty_tcnative_version
         implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
         implementation group: 'ch.qos.logback', name: 'logback-core', version: logback_version
