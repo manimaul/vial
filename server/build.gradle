@@ -48,3 +48,14 @@ bintray {
         labels = ['netty 4', 'flask', 'bottle', 'http/2']
     }
 }
+
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
+}
+
+dependencies {
+    implementation group:'org.jetbrains.kotlinx', name:'kotlinx-coroutines-core', version: '0.22.5'
+    testImplementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.9.1'
+}

@@ -7,8 +7,10 @@ import io.netty.bootstrap.ServerBootstrap
 import io.netty.handler.codec.http2.Http2SecurityUtil
 import io.netty.handler.ssl.*
 import org.slf4j.LoggerFactory
+import java.io.Closeable
 import java.net.InetSocketAddress
 import java.security.cert.CertificateException
+import java.util.concurrent.CompletableFuture
 import javax.net.ssl.SSLException
 
 private val log = LoggerFactory.getLogger(VialServerImpl::class.java)
@@ -17,8 +19,9 @@ internal class VialServerImpl (
         private val port: Int = 8080,
         private val h2Capable: Boolean = false,
         private val tlsContext: TlsContext?,
-        private val handlers: ImmutableMap<String, RequestHandler>
-) {
+        private val handlers: ImmutableMap<String, RequestHandler>,
+        private val config: ChannelConfig = ChannelConfig()
+) : Closeable {
 
     @Throws(CertificateException::class, SSLException::class)
     private fun sslContext(): SslContext? {
@@ -46,9 +49,12 @@ internal class VialServerImpl (
         }
     }
 
+    override fun close() {
+        config.eventLoopGroup.shutdownGracefully().sync()
+    }
+
     @Throws(InterruptedException::class, CertificateException::class, SSLException::class)
-    fun serve() {
-        val config = ChannelConfig()
+    fun serve(future: CompletableFuture<Closeable>? = null) {
         try {
             val bootstrap = ServerBootstrap()
             bootstrap.group(config.eventLoopGroup)
@@ -56,6 +62,7 @@ internal class VialServerImpl (
                     .localAddress(InetSocketAddress(port))
                     .childHandler(ServerChannelInitializer(sslContext(), h2Capable, handlers))
             val channelFuture = bootstrap.bind().addListener {
+                future?.complete(this)
                 log.warn("starting to accept connections")
             }.sync()
             channelFuture.channel().closeFuture().sync()

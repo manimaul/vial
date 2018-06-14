@@ -10,6 +10,7 @@ buildscript {
 }
 
 plugins {
+    id 'java'
     id 'net.researchgate.release' version '2.7.0'
 }
 
@@ -17,7 +18,7 @@ release {
     tagTemplate = 'v${version}'
 }
 
-allprojects {
+subprojects {
     apply plugin: 'java'
     apply plugin: 'kotlin'
 
@@ -28,6 +29,8 @@ allprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
+    //apply from: '../alpn_boot.gradle'
+
     dependencies {
         implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version
         implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
@@ -35,8 +38,8 @@ allprojects {
         implementation group: 'com.google.guava', name: 'guava', version: guava_version
         implementation group: 'com.typesafe', name: 'config', version: typesafe_config_version
         implementation group: 'io.netty', name: 'netty-all', version: netty_version
-        implementation group:'io.netty', name: 'netty-transport-native-epoll', version: netty_version
-        implementation group:'io.netty', name: 'netty-transport-native-kqueue', version: netty_version
+        implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: netty_version
+        implementation group: 'io.netty', name: 'netty-transport-native-kqueue', version: netty_version
         implementation group: 'io.netty', name: 'netty-tcnative-boringssl-static', version: netty_tcnative_version
         implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
         implementation group: 'ch.qos.logback', name: 'logback-core', version: logback_version
@@ -47,6 +50,8 @@ allprojects {
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jackson_version
 
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junit_version
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junit_version
+        testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit_version
         testImplementation group: 'org.mockito', name: 'mockito-core', version: mockito_version
         testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrest_version
     }
@@ -56,6 +61,11 @@ allprojects {
     }
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
+    }
+
+    test {
+        useJUnitPlatform()
+        //jvmArgs = [xbcp]
     }
 }
 
