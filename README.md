@@ -12,7 +12,7 @@ dependencies {
 }
 ```
 
-### Example
+### Kotlin Example
 ```kotlin
 private val log = LoggerFactory.getLogger(Main::class.java)
 
@@ -35,4 +35,33 @@ object Main {
                 .buildAndServe()
     }
 }
+```
+
+
+### Java Example
+```java
+@Slf4j
+public class MainJava {
+
+    public static void main(String[] args) {
+        log.debug("starting example server");
+
+        new VialServer()
+                .get("/", (request, response) -> {
+                    log.debug("get request {}", request);
+                    return response.setJson(new Response("hello from get"));
+                })
+                .post("/", (request, response) -> {
+                    log.debug("post request {}", request);
+                    return response.setJson(new Response("hello from post"));
+                })
+                .buildAndServe();
+    }
+
+    @Value
+    @AllArgsConstructor
+    private static class Response {
+        private final  String message;
+    }
+} 
 ```

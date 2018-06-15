@@ -8,11 +8,10 @@ import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.*
 import io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE
 import io.netty.handler.codec.http.HttpHeaderNames.SERVER
-import io.netty.handler.codec.http.HttpResponseStatus.OK
+import io.netty.handler.codec.http.HttpResponseStatus.*
 import io.netty.handler.codec.http2.DefaultHttp2Headers
 import io.netty.handler.codec.http2.Http2Headers
 import io.netty.util.AsciiString
-import java.io.IOException
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -61,12 +60,15 @@ class ResponseBuilder(
         return this
     }
 
-    @Throws(IOException::class)
     fun setJson(pojo: Any): ResponseBuilder {
         val byteBuf = allocator.directBuffer()
-        val stream: OutputStream = ByteBufOutputStream(byteBuf)
-        MAPPER.writeValue(stream, pojo)
-        body = byteBuf
+        try {
+            val stream: OutputStream = ByteBufOutputStream(byteBuf)
+            MAPPER.writeValue(stream, pojo)
+            body = byteBuf
+        } catch (e: Exception) {
+            setStatus(INTERNAL_SERVER_ERROR)
+        }
         addHeader(CONTENT_TYPE, JSON)
         return this
     }
