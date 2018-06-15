@@ -1,5 +1,6 @@
 # Vial
 ### Simple Netty based http/1.1 and http/2 framework
+[![CircleCI](https://circleci.com/gh/manimaul/vial/tree/master.svg?style=svg)](https://circleci.com/gh/manimaul/vial/tree/master)
 
 ### Gradle
 ```groovy
