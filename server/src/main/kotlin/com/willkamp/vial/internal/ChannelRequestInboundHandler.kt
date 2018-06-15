@@ -22,7 +22,10 @@ internal class ChannelRequestInboundHandler internal constructor(
         log.debug("read $msg")
         if (msg is FullHttpRequest) {
             val pathKey = "${msg.method().name()}_${msg.uri()}"
-            val request = Request(msg.uri(), msg.headers() + msg.trailingHeaders(), msg.content())
+            val request = Request(msg.uri(),
+                    msg.method().asciiName(),
+                    msg.headers() + msg.trailingHeaders(),
+                    msg.content())
             val response = handlers[pathKey]?.let { handler ->
                 handler(request, ResponseBuilder(ctx.alloc()))
                         .buildFullH1Response()

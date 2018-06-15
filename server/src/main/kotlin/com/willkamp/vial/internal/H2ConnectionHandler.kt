@@ -110,7 +110,9 @@ internal class H2ConnectionHandler internal constructor(
                              streamId: Int,
                              requestBody: ByteBuf?) {
         val responseBuilder = getHeaders(ctx, streamId)?.let { headers ->
-            val request = Request(headers.path(), headers, requestBody)
+            val method = HttpMethod.valueOf("${headers.method()}")
+            headers.method()
+            val request = Request(headers.path(), headers.method(), headers, requestBody)
             handler(headers)?.let { handler ->
                 handler(request, ResponseBuilder(ctx.alloc()))
             }

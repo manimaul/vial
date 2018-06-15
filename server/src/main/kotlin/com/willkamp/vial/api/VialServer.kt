@@ -2,6 +2,7 @@ package com.willkamp.vial.api
 
 import com.google.common.collect.ImmutableMap
 import com.willkamp.vial.internal.VialServerImpl
+import io.netty.handler.codec.http.HttpMethod
 import kotlinx.coroutines.experimental.async
 import java.io.Closeable
 import java.util.concurrent.CompletableFuture
@@ -14,17 +15,46 @@ class VialServer(
 
     private val handlers = mutableMapOf<String, RequestHandler>()
 
-    fun get(route: String, handler: RequestHandler): VialServer {
-        handlers["GET_$route"] = handler
+    fun request(method: HttpMethod, route: String, handler: RequestHandler): VialServer {
+        handlers["${method}_$route"] = handler
         return this
+    }
+
+    fun options(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.OPTIONS, route, handler)
+    }
+
+    fun get(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.GET, route, handler)
+    }
+
+    fun head(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.HEAD, route, handler)
     }
 
     fun post(route: String, handler: RequestHandler): VialServer {
-        handlers["POST_$route"] = handler
-        return this
+        return request(HttpMethod.POST, route, handler)
     }
 
-    //todo: other methods
+    fun put(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.PUT, route, handler)
+    }
+
+    fun patch(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.PATCH, route, handler)
+    }
+
+    fun delete(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.DELETE, route, handler)
+    }
+
+    fun trace(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.TRACE, route, handler)
+    }
+
+    fun connect(route: String, handler: RequestHandler): VialServer {
+        return request(HttpMethod.CONNECT, route, handler)
+    }
 
     fun buildAndServe() {
         build().serve()
