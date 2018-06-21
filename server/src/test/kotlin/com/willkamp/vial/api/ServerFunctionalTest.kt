@@ -15,17 +15,19 @@ private val log = LoggerFactory.getLogger(ServerFunctionalTest::class.java)
 
 class ServerFunctionalTest {
 
-    private var okHttpClient: OkHttpClient? = null
+    private var okHttpClients = arrayListOf<OkHttpClient>()
     private var serverCloser: Closeable? = null
 
-    private fun setupClient(protocol: String) {
-        okHttpClient = UnsafeClient.getUnsafeClient("h2" == protocol)
+    private fun setupClient() : OkHttpClient {
+        val client = UnsafeClient.getUnsafeClient(true)
+        okHttpClients.add(client)
+        return client
     }
 
-    private fun setupServer(protocol: String) {
+    private fun setupServer(protocol: String, port: Int) {
         val mp = if ("h2" == protocol) Protocol.HTTP_2 else Protocol.HTTP_1_1
         val vialServer = VialServer(
-                port = 8443,
+                port = port,
                 minimumProtocol = mp,
                 tlsContext = TlsContext.forServerSelfSigned()
         )
@@ -54,13 +56,14 @@ class ServerFunctionalTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["h1"/* todo: (WK) , "h2"*/])
+    @ValueSource(strings = ["h1", "h2"])
     fun testServer(protocol: String) {
-        setupClient(protocol)
-        setupServer(protocol)
-        val response = okHttpClient?.newCall(Request.Builder()
+        val okHttpClient = setupClient()
+        val port = if ("h2" == protocol) 8443 else 8080
+        setupServer(protocol, port)
+        val response = okHttpClient.newCall(Request.Builder()
                 .get()
-                .url("https://127.0.0.1:8443/v1/test")
+                .url("https://127.0.0.1:$port/v1/test")
                 .build())
                 ?.execute()
 
