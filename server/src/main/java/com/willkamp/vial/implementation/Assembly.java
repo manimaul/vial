@@ -7,35 +7,34 @@ import com.willkamp.vial.api.VialServer;
 import lombok.Getter;
 
 public enum Assembly {
-    instance;
+  instance;
 
-    @Getter(lazy = true)
-    private final VialConfig vialConfig = new VialConfig();
+  @Getter(lazy = true)
+  private final VialConfig vialConfig = new VialConfig();
 
-    @Getter(lazy = true)
-    private final ObjectMapper objectMapper = objectMapper();
+  @Getter(lazy = true)
+  private final ObjectMapper objectMapper = objectMapper();
 
-    SslContextFactory getSslContextFactory() {
-        return new SslContextFactory(getVialConfig());
-    }
+  SslContextFactory getSslContextFactory() {
+    return new SslContextFactory(getVialConfig());
+  }
 
-    ChannelConfig getChannelConfig() {
-        return new ChannelConfig();
-    }
+  ChannelConfig getChannelConfig() {
+    return new ChannelConfig();
+  }
 
+  VialChannelInitializer getVialChannelInitializer() {
+    return new VialChannelInitializer(getSslContextFactory().createSslContext());
+  }
 
-    VialChannelInitializer getVialChannelInitializer() {
-        return new VialChannelInitializer(getSslContextFactory().createSslContext());
-    }
+  public VialServer getVialServer() {
+    return new VialServerImpl(getVialConfig(), getChannelConfig(), getVialChannelInitializer());
+  }
 
-    public VialServer getVialServer() {
-        return new VialServerImpl(getVialConfig(), getChannelConfig(), getVialChannelInitializer());
-    }
-
-    private ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new ParameterNamesModule());
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper;
-    }
+  private ObjectMapper objectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new ParameterNamesModule());
+    objectMapper.registerModule(new JavaTimeModule());
+    return objectMapper;
+  }
 }

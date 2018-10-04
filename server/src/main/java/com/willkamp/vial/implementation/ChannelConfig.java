@@ -12,27 +12,27 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 class ChannelConfig {
-    private final EventLoopGroup eventLoopGroup;
-    private final Class<? extends ServerChannel> channelClass;
+  private final EventLoopGroup eventLoopGroup;
+  private final Class<? extends ServerChannel> channelClass;
 
-    final EventLoopGroup getEventLoopGroup() {
-        return this.eventLoopGroup;
-    }
+  final EventLoopGroup getEventLoopGroup() {
+    return this.eventLoopGroup;
+  }
 
-    final Class<? extends ServerChannel> getChannelClass() {
-        return this.channelClass;
-    }
+  final Class<? extends ServerChannel> getChannelClass() {
+    return this.channelClass;
+  }
 
-    ChannelConfig() {
-        if (Epoll.isAvailable()) {
-            this.eventLoopGroup = new EpollEventLoopGroup(10);
-            this.channelClass = EpollServerSocketChannel.class;
-        } else if (KQueue.isAvailable()) {
-            this.eventLoopGroup = new KQueueEventLoopGroup(10);
-            this.channelClass = KQueueServerSocketChannel.class;
-        } else {
-            this.eventLoopGroup = new NioEventLoopGroup(10);
-            this.channelClass = NioServerSocketChannel.class;
-        }
+  ChannelConfig() {
+    if (Epoll.isAvailable()) {
+      this.eventLoopGroup = new EpollEventLoopGroup(10);
+      this.channelClass = EpollServerSocketChannel.class;
+    } else if (KQueue.isAvailable()) {
+      this.eventLoopGroup = new KQueueEventLoopGroup(10);
+      this.channelClass = KQueueServerSocketChannel.class;
+    } else {
+      this.eventLoopGroup = new NioEventLoopGroup(10);
+      this.channelClass = NioServerSocketChannel.class;
     }
+  }
 }
