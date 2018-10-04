@@ -1,0 +1,13 @@
+plugins {
+    id 'application'
+}
+
+mainClassName = "com.willkamp.Main"
+
+repositories {
+    maven { url  "https://dl.bintray.com/madrona/maven" }
+}
+
+dependencies {
+    implementation project(":server")
+}

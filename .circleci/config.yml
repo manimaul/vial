@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: openjdk:8u171-jdk-stretch
+      - image: openjdk:11-jdk-slim
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images

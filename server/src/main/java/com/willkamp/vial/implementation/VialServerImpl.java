@@ -1,0 +1,92 @@
+package com.willkamp.vial.implementation;
+
+import com.willkamp.vial.api.RequestHandler;
+import com.willkamp.vial.api.VialServer;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.handler.codec.http.HttpMethod;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.Nullable;
+import java.io.Closeable;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+@Slf4j
+public class VialServerImpl implements VialServer, Closeable {
+    private final Map<String, RequestHandler> handlers;
+    private final VialConfig vialConfig;
+    private final ChannelConfig channelConfig;
+    private final VialChannelInitializer vialChannelInitializer;
+
+    VialServerImpl(VialConfig config, ChannelConfig channelConfig, VialChannelInitializer vialChannelInitializer) {
+        this.vialChannelInitializer = vialChannelInitializer;
+        this.handlers = new HashMap<>();
+        this.vialConfig = config;
+        this.channelConfig = channelConfig;
+    }
+
+    @Override
+    public VialServerImpl request(HttpMethod method, String route, RequestHandler handler) {
+        handlers.put(String.format("%s_%s", method, route), handler);
+        return this;
+    }
+
+    @Override
+    public VialServer staticContent(File rootDirectory) {
+        log.error("static content noop - not implemented");
+        return this;
+    }
+
+    @Override
+    public void listenAndServeBlocking() {
+        serve(null);
+    }
+
+    @Override
+    public CompletableFuture<Closeable> listenAndServe() {
+        CompletableFuture<Closeable> future = new CompletableFuture<>();
+        new Thread(() -> serve(future)).run();
+        return future;
+    }
+
+    private void serve(@Nullable CompletableFuture<Closeable> future) {
+        ServerBootstrap bootstrap = new ServerBootstrap();
+        vialChannelInitializer.setHandlers(handlers);
+        try {
+            InetAddress address = InetAddress.getByName(vialConfig.getAddress());
+            InetSocketAddress socketAddress = new InetSocketAddress(address, vialConfig.getPort());
+            bootstrap.group(channelConfig.getEventLoopGroup())
+                    .channel(channelConfig.getChannelClass())
+                    .localAddress(socketAddress)
+                    .childHandler(vialChannelInitializer);
+            ChannelFuture channelFuture = bootstrap.bind();
+            channelFuture.addListener(f -> {
+                if (future != null) {
+                    future.complete(this);
+                }
+            });
+            channelFuture.sync();
+            channelFuture.channel().closeFuture().sync();
+        } catch (UnknownHostException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            channelConfig.getEventLoopGroup().shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            log.error("error", e);
+            throw new RuntimeException(e);
+        }
+    }
+}

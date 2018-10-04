@@ -1,21 +1,8 @@
-# Vial
-### Simple Netty based http/1.1 and http/2 framework
-[![CircleCI](https://circleci.com/gh/manimaul/vial/tree/master.svg?style=svg)](https://circleci.com/gh/manimaul/vial/tree/master)
-
-### Gradle
-```groovy
-repositories {
-    maven { url  "https://dl.bintray.com/madrona/maven" }
-}
-
-dependencies {
-    implementation group: 'com.willkamp', name: 'vial-server', version: '0.0.4'
-}
-```
+package com.willkamp;
 
 
-### Java Example
-```java
+import com.willkamp.vial.api.VialServer;
+
 public class Main {
     public static void main(String[] args) {
         VialServer.create()
@@ -38,4 +25,3 @@ public class Main {
         }
     }
 }
-```
