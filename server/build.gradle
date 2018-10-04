@@ -21,7 +21,7 @@ publishing {
         maven(MavenPublication) {
             artifactId bintray_package
             groupId 'com.willkamp'
-            version project.version
+            version version
             from components.java
         }
     }
