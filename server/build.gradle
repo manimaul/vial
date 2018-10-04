@@ -1,3 +1,50 @@
 plugins {
     id 'java-library'
+    id 'com.jfrog.bintray' version '1.8.0'
+    id 'maven-publish'
+}
+
+description = 'vial server'
+
+task verifyBintrayConfig {
+    doLast {
+        println "bintray_user: $bintray_user"
+        println "bintray_key: $bintray_key"
+        println "version: $project.version"
+    }
+}
+
+def bintray_package = 'vial-server'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId bintray_package
+            groupId 'com.willkamp'
+            version project.version
+            from components.java
+        }
+    }
+}
+
+bintray {
+    user = bintray_user
+    key = bintray_key
+    dryRun = false
+    publish = true
+    publications = ['maven']
+    pkg {
+        userOrg = 'madrona'
+        repo = 'maven'
+        name = bintray_package
+        licenses = ['Apache-2.0']
+        websiteUrl = 'https://madrona.io'
+        issueTrackerUrl = 'https://github.com/manimaul/vial/issues'
+        vcsUrl = 'https://github.com/manimaul/vial.git'
+        desc = 'simplistic, netty4 based http/2 http/1.1 web framework'
+        labels = ['netty 4', 'flask', 'bottle', 'http/2']
+        version {
+            name = project.version //Bintray logical version name
+        }
+    }
 }

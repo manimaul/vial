@@ -1,6 +1,11 @@
 plugins {
     id 'java'
     id 'com.github.sherter.google-java-format' version '0.7.1'
+    id 'net.researchgate.release' version '2.7.0'
+}
+
+release {
+    tagTemplate = 'v${version}'
 }
 
 allprojects {
@@ -50,6 +55,8 @@ allprojects {
         testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit_version
     }
 }
+
+afterReleaseBuild.dependsOn ':server:bintrayUpload'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.10'
