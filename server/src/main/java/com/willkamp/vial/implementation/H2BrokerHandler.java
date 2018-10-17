@@ -2,7 +2,6 @@ package com.willkamp.vial.implementation;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 
-import com.willkamp.vial.api.RequestHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,7 +9,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http2.*;
 import io.netty.util.collection.IntObjectHashMap;
 import io.netty.util.collection.IntObjectMap;
-import java.util.Map;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,14 +17,13 @@ class H2BrokerHandler extends Http2EventAdapter {
 
   private final Http2ConnectionEncoder encoder;
   private final IntObjectMap<RequestImpl> requestMap = new IntObjectHashMap<>();
-  private final IntObjectMap<RequestHandler> handlerMap = new IntObjectHashMap<>();
+  private final IntObjectMap<RouteRegistry.Meta> handlerMap = new IntObjectHashMap<>();
   private final int maxPayloadBytes;
+  private final RouteRegistry routeRegistry;
 
-  private final Map<String, RequestHandler> handlers;
-
-  H2BrokerHandler(Http2ConnectionEncoder encoder, Map<String, RequestHandler> handlers) {
+  H2BrokerHandler(Http2ConnectionEncoder encoder) {
     this.encoder = encoder;
-    this.handlers = handlers;
+    this.routeRegistry = Assembly.instance.getRouteRegistry();
     this.maxPayloadBytes = Assembly.instance.getVialConfig().getMaxContentLength();
     encoder.connection().addListener(this);
   }
@@ -53,29 +50,39 @@ class H2BrokerHandler extends Http2EventAdapter {
     }
 
     @Nullable RequestImpl request = requestMap.get(streamId);
-    RequestHandler handler = handlerMap.get(streamId);
+    RouteRegistry.Meta meta = handlerMap.get(streamId);
     if (request == null) {
       request = RequestImpl.fromH2Headers(ctx.alloc(), headers);
       if (!endOfStream) requestMap.put(streamId, request);
     }
 
-    if (handler == null) {
-      String sig = String.format("%s_%s", headers.method(), headers.path());
-      handler = handlers.get(sig);
-      if (!endOfStream) handlerMap.put(streamId, handler);
+    if (meta == null) {
+      meta = routeRegistry.findHandler(headers.method(), headers.path()).orElse(null);
+      if (!endOfStream && meta != null) handlerMap.put(streamId, meta);
     }
 
     // If there's no data expected, call the handler. Else, pass the handler and request through in
     // the context.
     if (endOfStream) {
-      try {
-        ResponseImpl response =
-            (ResponseImpl) handler.handle(request, new ResponseImpl(ctx.alloc()));
-        writeResponse(ctx, streamId, response);
-      } catch (Exception e) {
-        log.error("route handler error", e);
-        writeResponse(
-            ctx, streamId, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.EMPTY_BUFFER);
+      if (meta == null) {
+        log.debug(
+            "route handler note found for method: {} and path: {}",
+            headers.method(),
+            headers.path());
+        writeResponse(ctx, streamId, HttpResponseStatus.NOT_FOUND, Unpooled.EMPTY_BUFFER);
+      } else {
+        try {
+          final RouteRegistry.Meta m = meta;
+          request.setPathParamGroupSupplier(() -> m.getRoute().groups(headers.path()));
+          ResponseImpl response =
+              (ResponseImpl) meta.getHandler().handle(request, new ResponseImpl(ctx.alloc()));
+
+          writeResponse(ctx, streamId, response);
+        } catch (Exception e) {
+          log.error("route handler error", e);
+          writeResponse(
+              ctx, streamId, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.EMPTY_BUFFER);
+        }
       }
     }
   }
@@ -107,12 +114,13 @@ class H2BrokerHandler extends Http2EventAdapter {
       return processed;
     }
     if (endOfStream) {
-      RequestHandler handler = handlerMap.get(streamId);
-      assert handler != null; //
+      RouteRegistry.Meta meta = handlerMap.get(streamId);
+      assert meta != null;
 
       try {
+        request.setPathParamGroupSupplier(() -> meta.getRoute().groups(request.getPath()));
         ResponseImpl response =
-            (ResponseImpl) handler.handle(request, new ResponseImpl(ctx.alloc()));
+            (ResponseImpl) meta.getHandler().handle(request, new ResponseImpl(ctx.alloc()));
         writeResponse(ctx, streamId, response);
         return processed;
       } catch (Exception e) {

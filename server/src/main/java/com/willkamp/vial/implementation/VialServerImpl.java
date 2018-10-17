@@ -10,32 +10,31 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class VialServerImpl implements VialServer, Closeable {
-  private final Map<String, RequestHandler> handlers;
   private final VialConfig vialConfig;
   private final ChannelConfig channelConfig;
   private final VialChannelInitializer vialChannelInitializer;
+  private final RouteRegistry routeRegistry;
 
   VialServerImpl(
       VialConfig config,
       ChannelConfig channelConfig,
-      VialChannelInitializer vialChannelInitializer) {
+      VialChannelInitializer vialChannelInitializer,
+      RouteRegistry routeRegistry) {
     this.vialChannelInitializer = vialChannelInitializer;
-    this.handlers = new HashMap<>();
     this.vialConfig = config;
     this.channelConfig = channelConfig;
+    this.routeRegistry = routeRegistry;
   }
 
   @Override
   public VialServerImpl request(HttpMethod method, String route, RequestHandler handler) {
-    handlers.put(String.format("%s_%s", method, route), handler);
+    routeRegistry.registerRoute(method, route, handler);
     return this;
   }
 
@@ -59,7 +58,6 @@ public class VialServerImpl implements VialServer, Closeable {
 
   private void serve(@Nullable CompletableFuture<Closeable> future) {
     ServerBootstrap bootstrap = new ServerBootstrap();
-    vialChannelInitializer.setHandlers(handlers);
     try {
       InetAddress address = InetAddress.getByName(vialConfig.getAddress());
       InetSocketAddress socketAddress = new InetSocketAddress(address, vialConfig.getPort());

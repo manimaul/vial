@@ -15,6 +15,9 @@ public enum Assembly {
   @Getter(lazy = true)
   private final ObjectMapper objectMapper = objectMapper();
 
+  @Getter(lazy = true)
+  private final RouteRegistry routeRegistry = new RouteRegistry();
+
   SslContextFactory getSslContextFactory() {
     return new SslContextFactory(getVialConfig());
   }
@@ -28,7 +31,8 @@ public enum Assembly {
   }
 
   public VialServer getVialServer() {
-    return new VialServerImpl(getVialConfig(), getChannelConfig(), getVialChannelInitializer());
+    return new VialServerImpl(
+        getVialConfig(), getChannelConfig(), getVialChannelInitializer(), getRouteRegistry());
   }
 
   private ObjectMapper objectMapper() {

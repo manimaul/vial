@@ -21,7 +21,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResponseImpl implements ResponseBuilder, Response {
+class ResponseImpl implements ResponseBuilder, Response {
   private static final AsciiString SERVER_VALUE = AsciiString.of("vial");
   private static final AsciiString JSON = AsciiString.cached("application/json");
   private static final AsciiString TEXT_HTML = AsciiString.cached("text/html");
@@ -82,7 +82,7 @@ public class ResponseImpl implements ResponseBuilder, Response {
 
   // endregion IResponseBuilder
 
-  public ByteBuf getBody() {
+  ByteBuf getBody() {
     return body == null ? Unpooled.EMPTY_BUFFER : body;
   }
 
@@ -94,7 +94,7 @@ public class ResponseImpl implements ResponseBuilder, Response {
     return body == null ? Unpooled.EMPTY_BUFFER : body;
   }
 
-  public final FullHttpResponse buildFullH1Response() {
+  final FullHttpResponse buildFullH1Response() {
     HttpResponseStatus status = this.status;
     if (status == null) {
       status = HttpResponseStatus.OK;
@@ -111,7 +111,7 @@ public class ResponseImpl implements ResponseBuilder, Response {
     return response;
   }
 
-  public final Http2Headers buildH2Headers() {
+  final Http2Headers buildH2Headers() {
     HttpResponseStatus status = this.status;
     if (status == null) {
       status = HttpResponseStatus.OK;

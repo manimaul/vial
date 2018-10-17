@@ -1,6 +1,8 @@
 package com.willkamp;
 
 import com.willkamp.vial.api.VialServer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 public class Main {
   public static void main(String[] args) {
@@ -10,18 +12,19 @@ public class Main {
         .post(
             "/",
             ((request, responseBuilder) -> responseBuilder.setBodyJson(new Pojo("hello POST"))))
+        .get(
+            "/v1/foo/:who/fifi",
+            ((request, responseBuilder) -> {
+              String who = request.pathParam("who").orElse("unknown");
+              return responseBuilder.setBodyJson(
+                  new Pojo(String.format("hello GET foo - who = %s", who)));
+            }))
         .listenAndServeBlocking();
   }
 
-  static class Pojo {
+  @AllArgsConstructor
+  @Getter
+  private static class Pojo {
     private final String message;
-
-    Pojo(String message) {
-      this.message = message;
-    }
-
-    public String getMessage() {
-      return message;
-    }
   }
 }

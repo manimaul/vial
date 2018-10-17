@@ -8,5 +8,7 @@ public interface Request {
 
   Optional<String> getBodyText();
 
+  Optional<String> pathParam(String key);
+
   <T> Optional<T> bodyJson(Class<T> clazz);
 }

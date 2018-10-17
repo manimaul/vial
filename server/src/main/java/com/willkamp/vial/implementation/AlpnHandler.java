@@ -1,11 +1,9 @@
 package com.willkamp.vial.implementation;
 
-import com.willkamp.vial.api.RequestHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
-import java.util.Map;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +12,9 @@ class AlpnHandler extends ApplicationProtocolNegotiationHandler {
 
   private Logger log = LoggerFactory.getLogger(AlpnHandler.class);
   private final Consumer<ChannelPipeline> fallback;
-  private final Map<String, RequestHandler> handlers;
 
-  AlpnHandler(Map<String, RequestHandler> handlers, Consumer<ChannelPipeline> fallback) {
+  AlpnHandler(Consumer<ChannelPipeline> fallback) {
     super(ApplicationProtocolNames.HTTP_1_1);
-    this.handlers = handlers;
     this.fallback = fallback;
   }
 
@@ -26,7 +22,7 @@ class AlpnHandler extends ApplicationProtocolNegotiationHandler {
   protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Exception {
     if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
       log.debug("configuring pipeline for h2");
-      ctx.pipeline().addLast(new Http2HandlerBuilder(this.handlers).build());
+      ctx.pipeline().addLast(new Http2HandlerBuilder().build());
       return;
     }
 

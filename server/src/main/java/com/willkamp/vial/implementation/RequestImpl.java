@@ -9,6 +9,7 @@ import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.util.CharsetUtil;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ final class RequestImpl implements Request {
   private final CompositeByteBuf body;
   private final ObjectMapper objectMapper = Assembly.instance.getObjectMapper();
   private final ByteBufAllocator alloc;
+  private Map<String, String> pathParamGroups = null;
+  private Supplier<Map<String, String>> pathParamGroupSupplier = Collections::emptyMap;
 
   static RequestImpl fromH2Headers(ByteBufAllocator alloc, Http2Headers headers) {
     return new RequestImpl(alloc, headers.path(), headers);
@@ -81,5 +84,22 @@ final class RequestImpl implements Request {
   @Override
   public Iterable<Map.Entry<CharSequence, CharSequence>> headers() {
     return headers == null ? Collections.emptyList() : headers;
+  }
+
+  @Override
+  public Optional<String> pathParam(String key) {
+    if (pathParamGroups == null) {
+      pathParamGroups = pathParamGroupSupplier.get();
+    }
+    return Optional.ofNullable(pathParamGroups.get(key));
+  }
+
+  void setPathParamGroupSupplier(Supplier<Map<String, String>> supplier) {
+    pathParamGroups = null;
+    pathParamGroupSupplier = supplier;
+  }
+
+  CharSequence getPath() {
+    return path;
   }
 }
