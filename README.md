@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.willkamp', name: 'vial-server', version: '0.0.4'
+    implementation group: 'com.willkamp', name: 'vial-server', version: '0.0.5'
 }
 ```
 
@@ -23,6 +23,11 @@ public class Main {
                         responseBuilder.setBodyJson(new Pojo("hello GET"))))
                 .post("/", ((request, responseBuilder) ->
                         responseBuilder.setBodyJson(new Pojo("hello POST"))))
+                .get("/v1/foo/:who/fifi", ((request, responseBuilder) -> {
+                        String who = request.pathParam("who").orElse("unknown");
+                        return responseBuilder.setBodyJson(
+                                new Pojo(String.format("hello GET foo - who = %s", who)));
+                    }))
                 .listenAndServeBlocking();
     }
 
