@@ -25,6 +25,7 @@ class ResponseImpl implements ResponseBuilder, Response {
   private static final AsciiString SERVER_VALUE = AsciiString.of("vial");
   private static final AsciiString JSON = AsciiString.cached("application/json");
   private static final AsciiString TEXT_HTML = AsciiString.cached("text/html");
+  private static final AsciiString TEXT_PLAIN = AsciiString.cached("text/plain");
   private Logger log = LoggerFactory.getLogger(ResponseImpl.class);
 
   private final ByteBufAllocator allocator;
@@ -63,6 +64,21 @@ class ResponseImpl implements ResponseBuilder, Response {
     byte[] bytes = html.getBytes(CharsetUtil.UTF_8);
     body = Unpooled.copiedBuffer(bytes);
     addHeader(CONTENT_TYPE, TEXT_HTML);
+    return this;
+  }
+
+  @Override
+  public ResponseBuilder setBodyData(String contentType, byte[] data) {
+    body = Unpooled.copiedBuffer(data);
+    addHeader(CONTENT_TYPE, contentType);
+    return this;
+  }
+
+  @Override
+  public ResponseBuilder setBodyText(String text) {
+    byte[] bytes = text.getBytes(CharsetUtil.UTF_8);
+    body = Unpooled.copiedBuffer(bytes);
+    addHeader(CONTENT_TYPE, TEXT_PLAIN);
     return this;
   }
 

@@ -1,0 +1,8 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':server')
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp_version
+}

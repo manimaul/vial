@@ -20,6 +20,7 @@ public class VialServerImpl implements VialServer, Closeable {
   private final ChannelConfig channelConfig;
   private final VialChannelInitializer vialChannelInitializer;
   private final RouteRegistry routeRegistry;
+  private ChannelFuture channelFuture;
 
   VialServerImpl(
       VialConfig config,
@@ -52,7 +53,7 @@ public class VialServerImpl implements VialServer, Closeable {
   @Override
   public CompletableFuture<Closeable> listenAndServe() {
     CompletableFuture<Closeable> future = new CompletableFuture<>();
-    new Thread(() -> serve(future)).run();
+    new Thread(() -> serve(future)).start();
     return future;
   }
 
@@ -66,7 +67,7 @@ public class VialServerImpl implements VialServer, Closeable {
           .channel(channelConfig.getChannelClass())
           .localAddress(socketAddress)
           .childHandler(vialChannelInitializer);
-      ChannelFuture channelFuture = bootstrap.bind();
+      channelFuture = bootstrap.bind();
       channelFuture.addListener(
           f -> {
             if (future != null) {
@@ -75,6 +76,7 @@ public class VialServerImpl implements VialServer, Closeable {
           });
       channelFuture.sync();
       channelFuture.channel().closeFuture().sync();
+      channelFuture = null;
     } catch (UnknownHostException | InterruptedException e) {
       throw new RuntimeException(e);
     } finally {
@@ -85,6 +87,9 @@ public class VialServerImpl implements VialServer, Closeable {
   @Override
   public void close() {
     try {
+      if (channelFuture != null) {
+        channelFuture.channel().close();
+      }
       channelConfig.getEventLoopGroup().shutdownGracefully().sync();
     } catch (InterruptedException e) {
       log.error("error", e);
