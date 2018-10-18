@@ -1,11 +1,12 @@
 package com.willkamp;
 
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -42,19 +43,35 @@ public class OkHttpUnsafe {
     return sslContext.getSocketFactory();
   }
 
+  public static OkHttpClient getUnsafeClient(String... protocols) throws Exception {
+    List<Protocol> protocolList =
+        Arrays.stream(protocols)
+            .map(
+                it -> {
+                  try {
+                    return Protocol.get(it);
+                  } catch (IOException e) {
+                    return null;
+                  }
+                })
+            .collect(Collectors.toList());
+    return getUnsafeClient(protocolList);
+  }
+
   public static OkHttpClient getUnsafeClient(Protocol... protocols) throws Exception {
+    return getUnsafeClient(Arrays.asList(protocols));
+  }
+
+  public static OkHttpClient getUnsafeClient(List<Protocol> protocols) throws Exception {
     X509TrustManager trustManager = unsafeTrustManager();
     final SSLSocketFactory sslSocketFactory = getUnsafeSSLSocketFactory(trustManager);
-    final List<Protocol> protocolList;
-    if (protocols.length == 0) {
-      protocolList = Collections.singletonList(Protocol.HTTP_1_1);
-    } else {
-      protocolList = Arrays.asList(protocols);
+    if (protocols.isEmpty()) {
+      throw new RuntimeException("protocols required");
     }
     return new OkHttpClient.Builder()
         .sslSocketFactory(sslSocketFactory, trustManager)
         .hostnameVerifier((hostname, session) -> true)
-        .protocols(protocolList)
+        .protocols(protocols)
         .build();
   }
 }

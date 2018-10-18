@@ -1,6 +1,7 @@
 package com.willkamp;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,17 +11,16 @@ import lombok.*;
 import okhttp3.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class ServerIntegrationTest {
 
   private Closeable server;
-  private OkHttpClient client;
 
   @BeforeEach
   void beforeEach() throws Exception {
     server = new TestServer().start();
-    client = OkHttpUnsafe.getUnsafeClient(Protocol.HTTP_2, Protocol.HTTP_1_1);
   }
 
   @AfterEach
@@ -28,21 +28,30 @@ public class ServerIntegrationTest {
     server.close();
   }
 
-  @Test
-  void testSlashGet() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"h2,http/1.1", "http/1.1"})
+  void testSlashGet(String protocol) throws Exception {
+    OkHttpClient client = OkHttpUnsafe.getUnsafeClient(protocol.split(","));
     Response response =
         client
             .newCall(new Request.Builder().url("https://127.0.0.1:8443/").get().build())
             .execute();
 
     assertEquals(200, response.code());
+    if (protocol.equals("h2,http/1.1")) {
+      assertEquals(Protocol.HTTP_2, response.protocol());
+    } else {
+      assertEquals(Protocol.HTTP_1_1, response.protocol());
+    }
     assertNotNull(response.body());
     assertEquals("GET /", response.body().string());
     assertEquals(response.header("content-type"), "text/plain");
   }
 
-  @Test
-  void testSlashPost() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"h2,http/1.1", "http/1.1"})
+  void testSlashPost(String protocol) throws Exception {
+    OkHttpClient client = OkHttpUnsafe.getUnsafeClient(protocol.split(","));
     Response response =
         client
             .newCall(
@@ -53,13 +62,20 @@ public class ServerIntegrationTest {
             .execute();
 
     assertEquals(200, response.code());
+    if (protocol.equals("h2,http/1.1")) {
+      assertEquals(Protocol.HTTP_2, response.protocol());
+    } else {
+      assertEquals(Protocol.HTTP_1_1, response.protocol());
+    }
     assertNotNull(response.body());
     assertEquals("<html><body>POST /</body></html>", response.body().string());
     assertEquals(response.header("content-type"), "text/html");
   }
 
-  @Test
-  void testParamsGet() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"h2,http/1.1", "http/1.1"})
+  void testParamsGet(String protocol) throws Exception {
+    OkHttpClient client = OkHttpUnsafe.getUnsafeClient(protocol.split(","));
     Response response =
         client
             .newCall(
@@ -67,13 +83,20 @@ public class ServerIntegrationTest {
             .execute();
 
     assertEquals(200, response.code());
+    if (protocol.equals("h2,http/1.1")) {
+      assertEquals(Protocol.HTTP_2, response.protocol());
+    } else {
+      assertEquals(Protocol.HTTP_1_1, response.protocol());
+    }
     assertNotNull(response.body());
     assertEquals("GET /foo/baz/bar/fiz", response.body().string());
     assertEquals(response.header("content-type"), "text/plain");
   }
 
-  @Test
-  void testParamsFileGet() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"h2,http/1.1", "http/1.1"})
+  void testParamsFileGet(String protocol) throws Exception {
+    OkHttpClient client = OkHttpUnsafe.getUnsafeClient(protocol.split(","));
     Response response =
         client
             .newCall(
@@ -84,6 +107,11 @@ public class ServerIntegrationTest {
             .execute();
 
     assertEquals(200, response.code());
+    if (protocol.equals("h2,http/1.1")) {
+      assertEquals(Protocol.HTTP_2, response.protocol());
+    } else {
+      assertEquals(Protocol.HTTP_1_1, response.protocol());
+    }
     assertNotNull(response.body());
     Sprite expected = Sprite.builder().user("willard").mapId("foo_map").build();
     Sprite actual = new ObjectMapper().readValue(response.body().byteStream(), Sprite.class);
@@ -91,14 +119,21 @@ public class ServerIntegrationTest {
     assertEquals("application/json", response.header("content-type"));
   }
 
-  @Test
-  void testUnknown() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"h2,http/1.1", "http/1.1"})
+  void testUnknown(String protocol) throws Exception {
+    OkHttpClient client = OkHttpUnsafe.getUnsafeClient(protocol.split(","));
     Response response =
         client
             .newCall(new Request.Builder().url("https://127.0.0.1:8443/unknown").get().build())
             .execute();
 
     assertEquals(404, response.code());
+    if (protocol.equals("h2,http/1.1")) {
+      assertEquals(Protocol.HTTP_2, response.protocol());
+    } else {
+      assertEquals(Protocol.HTTP_1_1, response.protocol());
+    }
   }
 
   static class TestServer {
