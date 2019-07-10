@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'com.github.sherter.google-java-format' version '0.7.1'
     id 'net.researchgate.release' version '2.7.0'
 }
 
@@ -11,8 +10,8 @@ release {
 allprojects {
     apply plugin: 'java'
 
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
     repositories {
         jcenter()
@@ -58,6 +57,4 @@ allprojects {
 
 afterReleaseBuild.dependsOn ':server:bintrayUpload'
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.10.2'
-}
+// ./gradlew wrapper --gradle-version=5.5 --distribution-type=all
