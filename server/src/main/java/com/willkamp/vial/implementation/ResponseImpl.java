@@ -32,7 +32,7 @@ class ResponseImpl implements ResponseBuilder, Response {
   private HttpResponseStatus status;
   private ByteBuf body;
   private Map<AsciiString, AsciiString> headers;
-  private final ObjectMapper objectMapper = Assembly.instance.getObjectMapper();
+  private final ObjectMapper objectMapper = Assembly.INSTANCE.getObjectMapper();
 
   ResponseImpl(ByteBufAllocator allocator) {
     this.allocator = allocator;

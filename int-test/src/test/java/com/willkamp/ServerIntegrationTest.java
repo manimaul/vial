@@ -138,25 +138,25 @@ public class ServerIntegrationTest {
 
   static class TestServer {
     Closeable start() throws Exception {
-      return VialServer.create()
-          .get("/", ((request, responseBuilder) -> responseBuilder.setBodyText("GET /")))
-          .post(
+      return VialServer.Companion.create()
+          .httpGet("/", ((request, responseBuilder) -> responseBuilder.setBodyText("GET /")))
+          .httpPost(
               "/",
               ((request, responseBuilder) ->
                   responseBuilder.setBodyHtml("<html><body>POST /</body></html>")))
-          .get(
+          .httpGet(
               "/foo/:param1/bar/:param2",
               ((request, responseBuilder) -> {
-                String param1 = request.pathParam("param1").orElse("unknown");
-                String param2 = request.pathParam("param2").orElse("unknown");
+                String param1 = request.pathParamOption("param1").orElse("unknown");
+                String param2 = request.pathParamOption("param2").orElse("unknown");
                 return responseBuilder.setBodyText(
                     String.format("GET /foo/%s/bar/%s", param1, param2));
               }))
-          .get(
+          .httpGet(
               "/styles/v1/:user/:mapId/sprite@2x.json",
               ((request, responseBuilder) -> {
-                String user = request.pathParam("user").orElse("unknown");
-                String mapId = request.pathParam("mapId").orElse("unknown");
+                String user = request.pathParamOption("user").orElse("unknown");
+                String mapId = request.pathParamOption("mapId").orElse("unknown");
                 return responseBuilder.setBodyJson(
                     Sprite.builder().user(user).mapId(mapId).build());
               }))

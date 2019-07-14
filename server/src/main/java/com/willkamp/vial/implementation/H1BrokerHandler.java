@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class H1BrokerHandler extends ChannelInboundHandlerAdapter {
 
-  private final RouteRegistry routeRegistry = Assembly.instance.getRouteRegistry();
+  private final RouteRegistry routeRegistry = Assembly.INSTANCE.getRouteRegistry();
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -22,11 +22,11 @@ class H1BrokerHandler extends ChannelInboundHandlerAdapter {
       final FullHttpResponse response;
       if (handler != null) {
         RequestImpl request =
-            RequestImpl.fromStringHeaders(
+            RequestImpl.Companion.fromStringHeaders(
                 ctx.alloc(), message.uri(), message.headers(), message.content());
         request.setPathParamGroupSupplier(() -> handler.getRoute().groups(message.uri()));
         response =
-            ((ResponseImpl) handler.getHandler().handle(request, new ResponseImpl(ctx.alloc())))
+            ((ResponseImpl) handler.getHandler().invoke(request, new ResponseImpl(ctx.alloc())))
                 .buildFullH1Response();
       } else {
         response =

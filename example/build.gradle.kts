@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     application
-    kotlin(module="jvm") version("1.3.41")
+    kotlin(module="jvm")
 }
 
 application {

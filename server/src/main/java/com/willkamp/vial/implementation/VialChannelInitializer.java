@@ -15,7 +15,7 @@ class VialChannelInitializer extends ChannelInitializer<SocketChannel> {
 
   VialChannelInitializer(@Nullable SslContext sslContext) {
     this.sslContext = sslContext;
-    this.vialConfig = Assembly.instance.getVialConfig();
+    this.vialConfig = Assembly.INSTANCE.getVialConfig();
   }
 
   @Override
