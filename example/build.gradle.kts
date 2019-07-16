@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     application
     kotlin(module="jvm")
@@ -9,17 +7,11 @@ application {
     mainClassName = "com.willkamp.MainKt"
 }
 
-repositories {
-    maven { setUrl( "https://dl.bintray.com/madrona/maven") }
-    jcenter()
-}
+//repositories {
+//    maven { setUrl( "https://dl.bintray.com/madrona/maven") }
+//}
 
 dependencies {
-    compile(project(":server"))
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-}
-
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    implementation(project(":server"))
+//    implementation("com.willkamp:vial-server:0.0.5")
 }

@@ -10,9 +10,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.UnknownHostException
 import java.util.concurrent.CompletableFuture
-import lombok.extern.slf4j.Slf4j
 
-@Slf4j
 class VialServerImpl internal constructor(
         private val vialConfig: VialConfig,
         private val channelConfig: ChannelConfig,

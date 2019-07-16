@@ -4,9 +4,7 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.handler.codec.http.FullHttpRequest
-import io.netty.handler.codec.http.FullHttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus
-import lombok.extern.slf4j.Slf4j
 
 internal class H1BrokerHandler(
         private val routeRegistry: RouteRegistry

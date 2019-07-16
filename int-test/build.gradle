@@ -2,7 +2,13 @@ plugins {
     id 'java'
 }
 
+def lombok_version='1.18.2'
+
 dependencies {
     implementation project(':server')
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp_version
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.11.0'
+
+    // Lombok
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    testImplementation group: 'org.projectlombok', name: 'lombok', version: lombok_version
 }

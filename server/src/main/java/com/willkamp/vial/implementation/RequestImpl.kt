@@ -9,14 +9,11 @@ import io.netty.util.CharsetUtil
 import java.io.IOException
 import java.util.*
 import kotlin.collections.Map.Entry
-import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.StreamSupport
-import lombok.extern.slf4j.Slf4j
 
-@Slf4j
 internal class RequestImpl private constructor(
-        private val alloc: ByteBufAllocator,
+        alloc: ByteBufAllocator,
         val path: CharSequence,
         private val headers: Iterable<Entry<CharSequence, CharSequence>>? = null) : Request {
 
