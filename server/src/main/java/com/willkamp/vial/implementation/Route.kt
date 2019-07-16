@@ -25,10 +25,6 @@ internal class Route private constructor(private val path: String, private val p
         return groups
     }
 
-    // Let's just assume that if two Route objects have been built
-    // from the same path that they will have the same pattern and
-    // keywords.
-
     override fun equals(other: Any?): Boolean {
         return if (other === this) {
             true

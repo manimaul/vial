@@ -7,7 +7,9 @@ import com.willkamp.vial.api.VialServer
 import lombok.Getter
 
 internal object Assembly {
-    val vialConfig: VialConfig by lazy { VialConfig() }
+    private fun createConfig(): VialConfig {
+        return VialConfig()
+    }
 
     val objectMapper: ObjectMapper by lazy {
         ObjectMapper().apply {
@@ -16,18 +18,27 @@ internal object Assembly {
         }
     }
 
-    val routeRegistry: RouteRegistry by lazy { RouteRegistry() }
+    private fun createRoutRegistry(): RouteRegistry {
+        return RouteRegistry()
+    }
 
-    val sslContextFactory: SslContextFactory
-        get() = SslContextFactory(vialConfig)
+    private fun createSslContextFactory(vialConfig: VialConfig): SslContextFactory {
+        return SslContextFactory(vialConfig)
 
-    val channelConfig: ChannelConfig
+    }
+
+    private val channelConfig: ChannelConfig
         get() = ChannelConfig()
 
-    val vialChannelInitializer: VialChannelInitializer
-        get() = VialChannelInitializer(sslContextFactory.createSslContext())
+    private fun createVialChannelInitializer(vialConfig: VialConfig, sslContextFactory: SslContextFactory, routeRegistry: RouteRegistry): VialChannelInitializer {
+        return VialChannelInitializer(sslContextFactory.createSslContext(), vialConfig, routeRegistry)
+    }
 
     val vialServer: VialServer
-        get() = VialServerImpl(
-                vialConfig, channelConfig, vialChannelInitializer, routeRegistry)
+        get() {
+            val routeRegistry = createRoutRegistry()
+            val config = createConfig()
+            val sslFactory = createSslContextFactory(config)
+            return VialServerImpl(config, channelConfig, createVialChannelInitializer(config, sslFactory, routeRegistry), routeRegistry)
+        }
 }

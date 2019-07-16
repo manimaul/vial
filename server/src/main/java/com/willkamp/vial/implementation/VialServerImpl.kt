@@ -47,16 +47,17 @@ class VialServerImpl internal constructor(
             val address = InetAddress.getByName(vialConfig.address)
             val socketAddress = InetSocketAddress(address, vialConfig.port)
             bootstrap
-                    .group(channelConfig.eventLoopGroup)
+                    .group(channelConfig.bossEventLoopGroup, channelConfig.eventLoopGroup)
                     .channel(channelConfig.channelClass)
                     .localAddress(socketAddress)
                     .childHandler(vialChannelInitializer)
-            channelFuture = bootstrap.bind()
-            channelFuture!!.addListener { f ->
+            val cf = bootstrap.bind()
+            channelFuture = cf
+            cf.addListener {
                 future?.complete(this)
             }
-            channelFuture!!.sync()
-            channelFuture!!.channel().closeFuture().sync()
+            cf.sync()
+            cf.channel().closeFuture().sync()
             channelFuture = null
         } catch (e: UnknownHostException) {
             throw RuntimeException(e)
@@ -69,9 +70,7 @@ class VialServerImpl internal constructor(
 
     override fun close() {
         try {
-            if (channelFuture != null) {
-                channelFuture!!.channel().close()
-            }
+            channelFuture?.channel()?.close()
             channelConfig.eventLoopGroup.shutdownGracefully().sync()
         } catch (e: InterruptedException) {
             log.error("error", e)

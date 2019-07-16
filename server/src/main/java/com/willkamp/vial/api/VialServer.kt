@@ -7,6 +7,12 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 
 interface VialServer {
+    companion object {
+
+        fun create(): VialServer {
+            return Assembly.vialServer
+        }
+    }
 
     fun request(method: HttpMethod, route: String, handler: RequestHandler): VialServer
 
@@ -50,12 +56,5 @@ interface VialServer {
 
     fun httpConnect(route: String, handler: RequestHandler): VialServer {
         return request(HttpMethod.CONNECT, route, handler)
-    }
-
-    companion object {
-
-        fun create(): VialServer {
-            return Assembly.vialServer
-        }
     }
 }

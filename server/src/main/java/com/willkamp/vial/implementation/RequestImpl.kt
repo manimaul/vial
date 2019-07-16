@@ -35,8 +35,8 @@ internal class RequestImpl private constructor(
 
     fun appendData(dataFrame: ByteBuf): Int {
         // CompositeByteBuf releases data
-        body!!.addComponent(true, dataFrame.retain())
-        return body.readableBytes()
+        body?.addComponent(true, dataFrame.retain())
+        return body?.readableBytes() ?: 0
     }
 
     override fun <T> bodyJson(clazz: Class<T>): T? {
@@ -59,7 +59,9 @@ internal class RequestImpl private constructor(
         if (pathParamGroups == null) {
             pathParamGroups = pathParamGroupSupplier()
         }
-        return pathParamGroups!![key]
+        return pathParamGroups?.let {
+            it[key]
+        }
     }
     fun setPathParamGroupSupplier(supplier: () -> Map<String, String>) {
         pathParamGroups = null
