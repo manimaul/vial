@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: openjdk:11-jdk-slim
+      - image: openjdk:8-jdk-slim
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -35,4 +35,4 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # run tests!
-      - run: ./gradlew build
+      - run: ./gradlew check
