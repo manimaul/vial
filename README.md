@@ -13,21 +13,43 @@ dependencies {
 }
 ```
 
+### Kotlin Example
+```kotlin
+fun main() {
+
+    VialServer.create()
+            .httpGet("/") { _, responseBuilder: ResponseBuilder ->
+                responseBuilder.setBodyJson(Pojo("hello GET"))
+            }
+            .httpPost("/") { _, responseBuilder ->
+                responseBuilder.setBodyJson(Pojo("hello POST"))
+            }
+            .httpGet("/v1/foo/:who/fifi") { request, responseBuilder ->
+                val who = request.pathParam("who")?:("unknown")
+                responseBuilder.setBodyJson(Pojo("hello GET foo - who = $who"))
+            }
+            .listenAndServeBlocking()
+}
+
+private data class Pojo(
+        val message: String
+)
+```
 
 ### Java Example
 ```java
-public class Main {
+class Main {
     public static void main(String[] args) {
-        VialServer.create()
-                .get("/", ((request, responseBuilder) ->
+        VialServer.Companion.create()
+                .httpGet("/", ((request, responseBuilder) ->
                         responseBuilder.setBodyJson(new Pojo("hello GET"))))
-                .post("/", ((request, responseBuilder) ->
+                .httpPost("/", ((request, responseBuilder) ->
                         responseBuilder.setBodyJson(new Pojo("hello POST"))))
-                .get("/v1/foo/:who/fifi", ((request, responseBuilder) -> {
-                        String who = request.pathParam("who").orElse("unknown");
-                        return responseBuilder.setBodyJson(
-                                new Pojo(String.format("hello GET foo - who = %s", who)));
-                    }))
+                .httpGet("/v1/foo/:who/fifi", ((request, responseBuilder) -> {
+                    String who = request.pathParamOption("who").orElse("unknown");
+                    return responseBuilder.setBodyJson(
+                            new Pojo(String.format("hello GET foo - who = %s", who)));
+                }))
                 .listenAndServeBlocking();
     }
 
