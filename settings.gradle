@@ -1,4 +1,0 @@
-rootProject.name = 'vial'
-include 'server', 'example'
-include 'int-test'
-
