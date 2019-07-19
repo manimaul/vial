@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java")
-    id("net.researchgate.release") version "2.7.0"
+    id("net.researchgate.release") version "2.8.1"
     id("org.jetbrains.kotlin.jvm") version "1.3.41"
 }
 
