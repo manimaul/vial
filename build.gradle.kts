@@ -10,6 +10,11 @@ release {
     tagTemplate = "v$version"
 }
 
+project.logger.info("jdk version is : ${JavaVersion.current()}")
+if (!JavaVersion.current().isJava11Compatible) {
+    throw GradleException("The minimum build jdk version required is ${JavaVersion.VERSION_11}")
+}
+
 allprojects {
     apply(plugin= "java")
     apply(plugin= "org.jetbrains.kotlin.jvm")
@@ -17,6 +22,11 @@ allprojects {
     repositories {
         jcenter()
         mavenCentral()
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     tasks.withType<KotlinCompile> {
@@ -34,8 +44,8 @@ allprojects {
     val slf4jVersion="1.7.25"
     val groovyVersion="2.4.1"
     val logbackVersion="1.2.3"
-    val nettyVersion="4.1.30.Final"
-    val nettyBoringSslVersion="2.0.17.Final"
+    val nettyVersion="4.1.37.Final"
+    val nettyBoringSslVersion="2.0.25.Final"
     val typesafeConfigVersion="1.3.2"
     val jacksonVersion="2.9.4"
     val guavaVersion="22.0"
@@ -81,4 +91,6 @@ tasks.afterReleaseBuild {
     dependsOn(":server:bintrayUpload")
 }
 
-// ./gradlew wrapper --gradle-version=5.5 --distribution-type=bin
+/* Install/Upgrade the Gradle wrapper
+./gradlew wrapper --gradle-version=5.5 --distribution-type=bin
+ */
