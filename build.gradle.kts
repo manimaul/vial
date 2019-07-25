@@ -7,7 +7,9 @@ plugins {
 }
 
 release {
-    tagTemplate = "v$version"
+    tagTemplate = "'v$version'"
+    versionPropertyFile = "gradle.properties"
+    scmAdapters = listOf(net.researchgate.release.GitAdapter::class.java)
 }
 
 project.logger.info("jdk version is : ${JavaVersion.current()}")
@@ -87,9 +89,10 @@ allprojects {
     }
 }
 
-tasks.afterReleaseBuild {
-    dependsOn(":server:bintrayUpload")
-}
+// todo: (WK) reenable
+//tasks.afterReleaseBuild {
+//    dependsOn(":server:bintrayUpload")
+//}
 
 /* Install/Upgrade the Gradle wrapper
 ./gradlew wrapper --gradle-version=5.5 --distribution-type=bin
