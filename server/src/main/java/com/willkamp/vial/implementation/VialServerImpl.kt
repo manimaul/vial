@@ -17,7 +17,7 @@ class VialServerImpl internal constructor(
         private val vialChannelInitializer: VialChannelInitializer,
         private val routeRegistry: RouteRegistry) : VialServer, Closeable {
     private var channelFuture: ChannelFuture? = null
-    private val log = logger<VialServerImpl>()
+    private val log = logger()
 
     override fun request(method: HttpMethod, route: String, handler: Function2<Request, ResponseBuilder, ResponseBuilder>): VialServer {
         routeRegistry.registerRoute(method, route, handler)
@@ -74,6 +74,5 @@ class VialServerImpl internal constructor(
             log.error("error", e)
             throw RuntimeException(e)
         }
-
     }
 }

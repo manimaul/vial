@@ -18,7 +18,7 @@ import java.io.OutputStream
 import java.util.HashMap
 
 internal class ResponseImpl(private val allocator: ByteBufAllocator) : ResponseBuilder, Response {
-    private val log = logger<ResponseImpl>()
+    private val log = logger()
     private var status: HttpResponseStatus? = null
     private var body: ByteBuf? = null
     private var headers: MutableMap<AsciiString, AsciiString>? = null

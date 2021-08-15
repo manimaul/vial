@@ -21,7 +21,7 @@ internal class RequestImpl private constructor(
     private val objectMapper = Assembly.objectMapper
     private var pathParamGroups: Map<String, String>? = null
     private var pathParamGroupSupplier: () -> Map<String, String> = { emptyMap() }
-    private val log = logger<RequestImpl>()
+    private val log = logger()
 
     override val bodyText: String?
         get() = body?.toString(CharsetUtil.UTF_8)

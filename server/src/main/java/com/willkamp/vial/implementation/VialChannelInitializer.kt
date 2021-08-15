@@ -18,15 +18,20 @@ internal class VialChannelInitializer(
     override fun initChannel(ch: SocketChannel) {
         sslContext?.let {
             configureH2(ch, it)
-        } ?: {
+        } ?: run {
             configureH1(ch.pipeline())
-        }()
+        }
     }
 
     private fun configureH2(ch: SocketChannel, sslContext: SslContext) {
-        ch.pipeline().addLast(sslContext.newHandler(ch.alloc()), AlpnHandler(Consumer {
-            this.configureH1(it)
-        }, routeRegistry, vialConfig))
+        ch.pipeline().addLast(
+                sslContext.newHandler(ch.alloc()),
+                AlpnHandler(
+                        fallback = { this.configureH1(it) },
+                        routeRegistry = routeRegistry,
+                        vialConfig = vialConfig
+                )
+        )
     }
 
     private fun configureH1(pipeline: ChannelPipeline) {

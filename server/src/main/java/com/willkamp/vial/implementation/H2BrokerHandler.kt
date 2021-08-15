@@ -17,7 +17,7 @@ internal class H2BrokerHandler(
     private val requestMap = IntObjectHashMap<RequestImpl>()
     private val handlerMap = IntObjectHashMap<RouteRegistry.Meta>()
     private val maxPayloadBytes: Int = vialConfig.maxContentLength
-    private val log = logger<H2BrokerHandler>()
+    private val log = logger()
 
     init {
         encoder.connection().addListener(this)

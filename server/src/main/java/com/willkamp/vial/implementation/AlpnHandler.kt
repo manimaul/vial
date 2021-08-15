@@ -14,7 +14,7 @@ internal class AlpnHandler(
         private val vialConfig: VialConfig
 ) : ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
 
-    private val log = logger<AlpnHandler>()
+    private val log = logger()
 
     @Throws(Exception::class)
     override fun configurePipeline(ctx: ChannelHandlerContext, protocol: String) {
