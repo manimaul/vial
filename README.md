@@ -5,11 +5,17 @@
 ### Gradle
 ```groovy
 repositories {
-    maven { url  "https://dl.bintray.com/madrona/maven" }
+    maven {
+        url = uri("https://maven.pkg.github.com/manimaul/vial")
+        credentials {
+            username = "${project.findProperty("github_user")}"
+            password = "${project.findProperty("github_token")}"
+        }
+    }
 }
 
 dependencies {
-    implementation group: 'com.willkamp', name: 'vial-server', version: '0.0.5'
+    implementation("com.willkamp:vial-server:1.0.9")
 }
 ```
 

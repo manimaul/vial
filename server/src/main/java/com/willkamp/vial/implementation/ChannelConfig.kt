@@ -9,7 +9,6 @@ import io.netty.channel.kqueue.KQueue
 import io.netty.channel.kqueue.KQueueEventLoopGroup
 import io.netty.channel.kqueue.KQueueServerSocketChannel
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.ServerSocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 
 private const val BOSS_THREADS = 5
@@ -35,6 +34,6 @@ internal class ChannelConfig {
             Epoll.isAvailable() -> EpollServerSocketChannel::class.java
             KQueue.isAvailable() -> KQueueServerSocketChannel::class.java
             else -> NioServerSocketChannel::class.java
-        } as Class<out ServerChannel>
+        }
     }
 }

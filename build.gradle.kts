@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("java")
+    id("org.jetbrains.kotlin.jvm") version "1.5.21"
     id("net.researchgate.release") version "2.8.1"
-    id("org.jetbrains.kotlin.jvm") version "1.3.41"
+    `java-library`
 }
 
 release {
-    tagTemplate = "'v$version'"
+    tagTemplate = "v$version"
     versionPropertyFile = "gradle.properties"
     scmAdapters = listOf(net.researchgate.release.GitAdapter::class.java)
 }
@@ -22,8 +22,8 @@ allprojects {
     apply(plugin= "org.jetbrains.kotlin.jvm")
 
     repositories {
-        jcenter()
         mavenCentral()
+        google()
     }
 
     java {
@@ -43,23 +43,24 @@ allprojects {
         }
     }
 
-    val slf4jVersion="1.7.25"
-    val groovyVersion="2.4.1"
-    val logbackVersion="1.2.3"
-    val nettyVersion="4.1.37.Final"
-    val nettyBoringSslVersion="2.0.25.Final"
-    val typesafeConfigVersion="1.3.2"
-    val jacksonVersion="2.9.4"
-    val guavaVersion="22.0"
+    val slf4jVersion="1.7.32"
+    val groovyVersion="3.0.8"
+    val logbackVersion="1.2.5"
+    val nettyVersion="4.1.66.Final"
+    val nettyBoringSslVersion="2.0.40.Final"
+    val typesafeConfigVersion="1.4.1"
+    val jacksonVersion="2.12.4"
+    val guavaVersion="30.1.1-jre"
 
     // testing dependencies
     val hamcrestVersion="1.3"
     val mockitoVersion="2.18.3"
-    val junitVersion="5.2.0"
+    val junitVersion="5.7.1"
 
     dependencies {
         // Kotlin
         api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
         // Netty
         implementation("io.netty:netty-all:$nettyVersion")
@@ -81,19 +82,13 @@ allprojects {
         implementation("com.typesafe:config:$typesafeConfigVersion")
 
         // JUnit5
-        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+        testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation("org.mockito:mockito-core:$mockitoVersion")
         testImplementation("org.hamcrest:hamcrest-all:$hamcrestVersion")
-        testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     }
 }
 
-// todo: (WK) reenable
-//tasks.afterReleaseBuild {
-//    dependsOn(":server:bintrayUpload")
-//}
-
-/* Install/Upgrade the Gradle wrapper
-./gradlew wrapper --gradle-version=5.5 --distribution-type=bin
- */
+tasks.afterReleaseBuild {
+    dependsOn(":server:publish")
+}

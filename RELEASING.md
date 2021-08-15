@@ -1,15 +1,15 @@
 # Releasing
 
-#### Set your bintray user and key
+#### Set your Github user and token
 ```
 vim ~/.gradle/gradle.properties
 
-bintray_user=your_user
-bintray_key=your_key
+github_user=<your_user>
+github_token=<your_token>
 ```
 
-#### Tag release and push to bintray
+#### Tag release and publish
 
 ```
-$ ./gradlew release
+$./gradlew :server:release
 ```
