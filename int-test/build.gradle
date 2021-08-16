@@ -6,7 +6,7 @@ def lombok_version='1.18.2'
 
 dependencies {
     implementation project(':server')
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    api("com.squareup.okhttp3:okhttp:4.9.0")
 
     // Lombok
     testAnnotationProcessor "org.projectlombok:lombok:$lombok_version"

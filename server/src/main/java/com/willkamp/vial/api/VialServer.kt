@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture
 interface VialServer {
     companion object {
 
+        @JvmStatic
         fun create(): VialServer {
             return Assembly.vialServer
         }
@@ -17,6 +18,8 @@ interface VialServer {
     fun request(method: HttpMethod, route: String, handler: RequestHandler): VialServer
 
     fun staticContent(rootDirectory: File): VialServer
+
+    fun webSocket(route: String, senderReady: WebSocketHandlerInit, receiver: WebSocketReceiver) : VialServer
 
     fun listenAndServeBlocking()
 

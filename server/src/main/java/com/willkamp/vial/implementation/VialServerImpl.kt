@@ -29,6 +29,14 @@ class VialServerImpl internal constructor(
         return this
     }
 
+    override fun webSocket(
+            route: String,
+            senderReady: WebSocketHandlerInit,
+            receiver: WebSocketReceiver) : VialServer {
+        routeRegistry.registerWebSocketRoute(route, senderReady, receiver)
+        return this
+    }
+
     override fun listenAndServeBlocking() {
         serve(null)
     }

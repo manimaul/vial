@@ -1,31 +1,79 @@
 package com.willkamp;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.willkamp.vial.api.VialServer;
-import java.io.Closeable;
+import com.willkamp.vial.api.WebSocketTextMessage;
 import lombok.*;
 import okhttp3.*;
+import okio.ByteString;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerIntegrationTest {
 
   private Closeable server;
+  private TestServer testServer;
 
   @BeforeEach
   void beforeEach() throws Exception {
-    server = new TestServer().start();
+    testServer = new TestServer();
+    server = testServer.start();
   }
 
   @AfterEach
   void afterEach() throws Exception {
     server.close();
+  }
+
+  @Test
+  void testWebSocket() throws Exception {
+    OkHttpClient client = OkHttpUnsafe.getUnsafeClient(Protocol.HTTP_1_1, Protocol.HTTP_2);
+    final CountDownLatch latch = new CountDownLatch(1);
+    final List<String> clientRecievedMessages = new ArrayList<>();
+    client.newWebSocket(new Request.Builder().url("https://127.0.0.1:8443/websocket").get().build(), new WebSocketListener() {
+      @Override
+      public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
+        clientRecievedMessages.add(text);
+        webSocket.close(1000, "done");
+      }
+
+      @Override
+      public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+        fail("not expecting binary message");
+      }
+
+      @Override
+      public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
+        assertEquals(101, response.code());
+        webSocket.send("hello");
+      }
+
+      @Override
+      public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+        latch.countDown();
+      }
+    });
+
+    assertTrue(latch.await(5000, TimeUnit.SECONDS));
+
+    assertEquals(1, testServer.receivedWsMessages.size());
+    assertEquals("hello", testServer.receivedWsMessages.get(0));
+
+    assertEquals(1,clientRecievedMessages.size());
+    assertEquals("hello ws", clientRecievedMessages.get(0));
   }
 
   @ParameterizedTest
@@ -137,6 +185,8 @@ public class ServerIntegrationTest {
   }
 
   static class TestServer {
+    ArrayList<String> receivedWsMessages = new ArrayList<>();
+
     Closeable start() throws Exception {
       return VialServer.Companion.create()
           .httpGet("/", ((request, responseBuilder) -> responseBuilder.setBodyText("GET /")))
@@ -160,6 +210,16 @@ public class ServerIntegrationTest {
                 return responseBuilder.setBodyJson(
                     Sprite.builder().user(user).mapId(mapId).build());
               }))
+              .webSocket("/websocket", webSocketSender -> {
+                    webSocketSender.send(new WebSocketTextMessage("hello ws"));
+                return null;
+              }, webSocketMessage -> {
+                  if (webSocketMessage instanceof WebSocketTextMessage) {
+                    String msg = ((WebSocketTextMessage) webSocketMessage).getText();
+                    receivedWsMessages.add(msg);
+                  }
+                return null;
+              })
           .listenAndServe()
           .get();
     }

@@ -21,9 +21,8 @@ internal object Assembly {
         return RouteRegistry()
     }
 
-    private fun createSslContextFactory(vialConfig: VialConfig): SslContextFactory {
-        return SslContextFactory(vialConfig)
-
+    private fun createSslContextFactory(): SslContextFactory {
+        return SslContextFactory()
     }
 
     private val channelConfig: ChannelConfig
@@ -37,7 +36,7 @@ internal object Assembly {
         get() {
             val routeRegistry = createRoutRegistry()
             val config = createConfig()
-            val sslFactory = createSslContextFactory(config)
+            val sslFactory = createSslContextFactory()
             return VialServerImpl(config, channelConfig, createVialChannelInitializer(config, sslFactory, routeRegistry), routeRegistry)
         }
 }

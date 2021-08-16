@@ -5,8 +5,6 @@ import io.netty.channel.ChannelPipeline
 import io.netty.handler.ssl.ApplicationProtocolNames
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler
 import java.util.function.Consumer
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal class AlpnHandler(
         private val fallback: Consumer<ChannelPipeline>,

@@ -5,8 +5,9 @@ import io.netty.channel.ChannelPipeline
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpServerCodec
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import io.netty.handler.ssl.SslContext
-import java.util.function.Consumer
 
 internal class VialChannelInitializer(
         private val sslContext: SslContext?,
@@ -38,6 +39,14 @@ internal class VialChannelInitializer(
         pipeline
                 .addLast("server codec duplex", HttpServerCodec())
                 .addLast("message size limit aggregator", HttpObjectAggregator(vialConfig.maxContentLength))
+                .addLast("websocket compression", WebSocketServerCompressionHandler())
+
+        routeRegistry.wsHandlers.forEach {
+            pipeline.addLast(WebSocketServerProtocolHandler(it.route, null, true, vialConfig.maxContentLength))
+        }
+
+        pipeline
+                .addLast("websocket frames", WebSocketFrameHandler(routeRegistry))
                 .addLast("request handler", H1BrokerHandler(routeRegistry))
     }
 }
