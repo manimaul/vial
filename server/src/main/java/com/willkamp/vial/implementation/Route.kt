@@ -4,7 +4,11 @@ import java.util.ArrayList
 import java.util.HashMap
 import java.util.regex.Pattern
 
-internal class Route private constructor(private val path: String, private val pathPattern: Pattern, private val keywords: List<String>) {
+internal class Route private constructor(
+        private val path: String,
+        private val pathPattern: Pattern,
+        private val keywords: List<String>
+        ) {
 
     fun pathPattern(): Pattern {
         return pathPattern

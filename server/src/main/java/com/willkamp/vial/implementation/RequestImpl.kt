@@ -4,6 +4,7 @@ import com.willkamp.vial.api.Request
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.CompositeByteBuf
+import io.netty.handler.codec.http.QueryStringDecoder
 import io.netty.handler.codec.http2.Http2Headers
 import io.netty.util.CharsetUtil
 import java.io.IOException
@@ -20,8 +21,12 @@ internal class RequestImpl private constructor(
     private val body: CompositeByteBuf?
     private val objectMapper = Assembly.objectMapper
     private var pathParamGroups: Map<String, String>? = null
+    private val queryParams by lazy {
+        QueryStringDecoder("$path").parameters()
+    }
     private var pathParamGroupSupplier: () -> Map<String, String> = { emptyMap() }
     private val log = logger()
+
 
     override val bodyText: String?
         get() = body?.toString(CharsetUtil.UTF_8)
@@ -60,6 +65,19 @@ internal class RequestImpl private constructor(
             it[key]
         }
     }
+
+    override fun queryParams(key: String): List<String> {
+        return queryParams.getOrDefault(key, emptyList())
+    }
+
+    override fun queryKeys(): Set<String> {
+        return queryParams.keys
+    }
+
+    override fun queryParam(key: String): String? {
+        return queryParams(key).firstOrNull()
+    }
+
     fun setPathParamGroupSupplier(supplier: () -> Map<String, String>) {
         pathParamGroups = null
         pathParamGroupSupplier = supplier

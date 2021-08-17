@@ -17,11 +17,12 @@ internal class RouteRegistry {
         }.add(Meta(Route.build(routePattern), handler))
     }
 
-    fun findHandler(method: CharSequence, path: CharSequence): Optional<Meta> {
-        return findHandler(HttpMethod.valueOf(method.toString()), path)
+    fun findHandler(method: CharSequence, url: CharSequence): Optional<Meta> {
+        return findHandler(HttpMethod.valueOf(method.toString()), url)
     }
 
-    fun findHandler(method: HttpMethod, path: CharSequence): Optional<Meta> {
+    fun findHandler(method: HttpMethod, url: CharSequence): Optional<Meta> {
+        val path = url.indexOf('?').takeIf { it > 0 }?.let { url.subSequence(0, it) } ?: url
         return Optional.ofNullable(routeHandlers[method])
                 .flatMap { metaList ->
                     metaList.stream().filter { meta ->
