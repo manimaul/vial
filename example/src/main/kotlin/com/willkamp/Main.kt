@@ -16,6 +16,12 @@ fun main() {
                 val who = request.pathParam("who")?:("unknown")
                 responseBuilder.setBodyJson(Pojo("hello GET foo - who = $who"))
             }
+            .webSocket("/websocket") {webSocket ->
+                webSocket.sendText("hello")
+                webSocket.receiveText {
+                    println("received message = $it")
+                }
+            }
             .listenAndServeBlocking()
 }
 

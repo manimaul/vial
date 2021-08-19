@@ -258,15 +258,9 @@ public class ServerIntegrationTest {
                                 return responseBuilder.setBodyJson(
                                         Sprite.builder().user(user).mapId(mapId).build());
                             }))
-                    .webSocket("/websocket", webSocketSender -> {
-                        webSocketSender.send(new WebSocketTextMessage("hello ws"));
-                        return null;
-                    }, webSocketMessage -> {
-                        if (webSocketMessage instanceof WebSocketTextMessage) {
-                            String msg = ((WebSocketTextMessage) webSocketMessage).getText();
-                            receivedWsMessages.add(msg);
-                        }
-                        return null;
+                    .webSocket("/websocket", webSocket -> {
+                        webSocket.sendText("hello ws");
+                        webSocket.receiveText(msg -> receivedWsMessages.add(msg));
                     })
                     .listenAndServe()
                     .get();

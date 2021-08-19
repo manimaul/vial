@@ -5,6 +5,8 @@ import io.netty.handler.codec.http.HttpMethod
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Supplier
 
 interface VialServer {
     companion object {
@@ -19,7 +21,7 @@ interface VialServer {
 
     fun staticContent(rootDirectory: File): VialServer
 
-    fun webSocket(route: String, senderReady: WebSocketHandlerInit, receiver: WebSocketReceiver) : VialServer
+    fun webSocket(route: String, senderReady: Consumer<WebSocket>) : VialServer
 
     fun listenAndServeBlocking()
 

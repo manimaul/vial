@@ -10,6 +10,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.UnknownHostException
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
 
 class VialServerImpl internal constructor(
         private val vialConfig: VialConfig,
@@ -31,9 +32,8 @@ class VialServerImpl internal constructor(
 
     override fun webSocket(
             route: String,
-            senderReady: WebSocketHandlerInit,
-            receiver: WebSocketReceiver) : VialServer {
-        routeRegistry.registerWebSocketRoute(route, senderReady, receiver)
+            senderReady: Consumer<WebSocket>) : VialServer {
+        routeRegistry.registerWebSocketRoute(route, senderReady)
         return this
     }
 

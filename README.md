@@ -3,6 +3,13 @@
 [![CircleCI](https://circleci.com/gh/manimaul/vial/tree/master.svg?style=svg)](https://circleci.com/gh/manimaul/vial/tree/master)
 
 ### Gradle
+
+Edit $HOME/.gradle/gradle.properties and add your Github user and token
+```text
+github_user=<your_username>
+github_token=<your_token>
+```
+
 ```groovy
 repositories {
     maven {
@@ -15,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.willkamp:vial-server:1.0.9")
+    implementation("com.willkamp:vial-server:1.0.11")
 }
 ```
 
@@ -34,6 +41,12 @@ fun main() {
                 val who = request.pathParam("who")?:("unknown")
                 responseBuilder.setBodyJson(Pojo("hello GET foo - who = $who"))
             }
+            .webSocket("/websocket") {webSocket ->
+                webSocket.sendText("hello")
+                webSocket.receiveText {
+                    println("received message = $it")
+                }
+            }
             .listenAndServeBlocking()
 }
 
@@ -46,7 +59,7 @@ private data class Pojo(
 ```java
 class Main {
     public static void main(String[] args) {
-        VialServer.Companion.create()
+        VialServer.create()
                 .httpGet("/", ((request, responseBuilder) ->
                         responseBuilder.setBodyJson(new Pojo("hello GET"))))
                 .httpPost("/", ((request, responseBuilder) ->
@@ -56,6 +69,10 @@ class Main {
                     return responseBuilder.setBodyJson(
                             new Pojo(String.format("hello GET foo - who = %s", who)));
                 }))
+                .webSocket("/websocket", (webSocket) -> {
+                    webSocket.sendText("hello");
+                    webSocket.receiveText( msg -> System.out.printf("received message = %s%n", msg));
+                })
                 .listenAndServeBlocking();
     }
 

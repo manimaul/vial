@@ -3,6 +3,7 @@ package com.willkamp.vial.implementation
 import com.willkamp.vial.api.*
 import io.netty.handler.codec.http.HttpMethod
 import java.util.*
+import java.util.function.Consumer
 
 internal class RouteRegistry {
     private val routeHandlers = HashMap<HttpMethod, MutableList<Meta>>()
@@ -31,8 +32,8 @@ internal class RouteRegistry {
                 }
     }
 
-    fun registerWebSocketRoute(route: String, senderReady: WebSocketHandlerInit, receiver: WebSocketReceiver) {
-        wsHandlers.add(WSMeta(route, receiver, senderReady))
+    fun registerWebSocketRoute(route: String, senderReady: Consumer<WebSocket>) {
+        wsHandlers.add(WSMeta(route, senderReady))
     }
 
     fun findWebSocketHandler(route: String) : WSMeta? {
@@ -49,7 +50,6 @@ internal class RouteRegistry {
 
     internal data class WSMeta(
             val route: String,
-            val receiver: WebSocketReceiver,
-            val init: WebSocketHandlerInit,
+            val init: Consumer<WebSocket>,
     )
 }
