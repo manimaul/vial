@@ -1,5 +1,6 @@
 package com.willkamp.vial.implementation
 
+import com.willkamp.vial.api.VialConfig
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.ssl.ApplicationProtocolNames

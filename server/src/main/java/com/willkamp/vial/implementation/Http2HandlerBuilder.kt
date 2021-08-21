@@ -1,5 +1,6 @@
 package com.willkamp.vial.implementation
 
+import com.willkamp.vial.api.VialConfig
 import io.netty.handler.codec.http2.*
 
 internal class Http2HandlerBuilder(

@@ -1,8 +1,8 @@
-package com.willkamp.vial.implementation
+package com.willkamp.vial.api
 
 import com.typesafe.config.ConfigFactory
 
-internal class VialConfig {
+class VialConfig {
     val port: Int
     val address: String
     val maxContentLength: Int

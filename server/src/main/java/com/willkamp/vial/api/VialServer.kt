@@ -1,19 +1,23 @@
 package com.willkamp.vial.api
 
 import com.willkamp.vial.implementation.Assembly
+import io.netty.channel.ChannelHandler
 import io.netty.handler.codec.http.HttpMethod
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
-import java.util.function.Supplier
 
-interface VialServer {
+interface VialServer : ServerInitializer {
     companion object {
 
         @JvmStatic
         fun create(): VialServer {
-            return Assembly.vialServer
+            return Assembly.createVialServer()
+        }
+
+        fun customServer(channelInitializer: ChannelHandler) : ServerInitializer  {
+            return Assembly.createCustomInitializer(channelInitializer)
         }
     }
 
@@ -22,10 +26,6 @@ interface VialServer {
     fun staticContent(rootDirectory: File): VialServer
 
     fun webSocket(route: String, senderReady: Consumer<WebSocket>) : VialServer
-
-    fun listenAndServeBlocking()
-
-    fun listenAndServe(): CompletableFuture<Closeable>
 
     fun httpOptions(route: String, handler: RequestHandler): VialServer {
         return request(HttpMethod.OPTIONS, route, handler)
@@ -62,4 +62,10 @@ interface VialServer {
     fun httpConnect(route: String, handler: RequestHandler): VialServer {
         return request(HttpMethod.CONNECT, route, handler)
     }
+}
+
+interface ServerInitializer: Closeable {
+    fun listenAndServe(): CompletableFuture<Closeable>
+    fun listenAndServeBlocking()
+    val vialConfig: VialConfig
 }

@@ -1,5 +1,6 @@
 package com.willkamp.vial.implementation
 
+import com.willkamp.vial.api.VialConfig
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelPipeline
 import io.netty.channel.socket.SocketChannel
