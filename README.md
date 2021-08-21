@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.willkamp:vial-server:1.0.11")
+    implementation("com.willkamp:vial-server:2.0.0")
 }
 ```
 
@@ -31,27 +31,33 @@ dependencies {
 fun main() {
 
     VialServer.create()
-            .httpGet("/") { _, responseBuilder: ResponseBuilder ->
-                responseBuilder.setBodyJson(Pojo("hello GET"))
+        .httpGet("/") { request ->
+            request.respondWith { response ->
+                response.setBodyJson(Pojo("hello GET"))
             }
-            .httpPost("/") { _, responseBuilder ->
-                responseBuilder.setBodyJson(Pojo("hello POST"))
+        }
+        .httpPost("/") { request ->
+            request.respondWith { response ->
+                response.setBodyJson(Pojo("hello POST"))
             }
-            .httpGet("/v1/foo/:who/fifi") { request, responseBuilder ->
-                val who = request.pathParam("who")?:("unknown")
-                responseBuilder.setBodyJson(Pojo("hello GET foo - who = $who"))
+        }
+        .httpGet("/v1/foo/:who/fifi") { request ->
+            val who = request.pathParam("who")?:("unknown")
+            request.respondWith { response ->
+                response.setBodyJson(Pojo("hello GET foo - who = $who"))
             }
-            .webSocket("/websocket") {webSocket ->
-                webSocket.sendText("hello")
-                webSocket.receiveText {
-                    println("received message = $it")
-                }
+        }
+        .webSocket("/websocket") {webSocket ->
+            webSocket.sendText("hello")
+            webSocket.receiveText {
+                println("received message = $it")
             }
-            .listenAndServeBlocking()
+        }
+        .listenAndServeBlocking()
 }
 
-private data class Pojo(
-        val message: String
+data class Pojo(
+    val message: String
 )
 ```
 
@@ -60,20 +66,27 @@ private data class Pojo(
 class Main {
     public static void main(String[] args) {
         VialServer.create()
-                .httpGet("/", ((request, responseBuilder) ->
-                        responseBuilder.setBodyJson(new Pojo("hello GET"))))
-                .httpPost("/", ((request, responseBuilder) ->
-                        responseBuilder.setBodyJson(new Pojo("hello POST"))))
-                .httpGet("/v1/foo/:who/fifi", ((request, responseBuilder) -> {
-                    String who = request.pathParamOption("who").orElse("unknown");
-                    return responseBuilder.setBodyJson(
-                            new Pojo(String.format("hello GET foo - who = %s", who)));
-                }))
-                .webSocket("/websocket", (webSocket) -> {
-                    webSocket.sendText("hello");
-                    webSocket.receiveText( msg -> System.out.printf("received message = %s%n", msg));
-                })
-                .listenAndServeBlocking();
+            .httpGet("/", request ->
+                request.respondWith(response ->
+                    response.setBodyJson(new Pojo("hello GET"))
+                )
+            )
+            .httpPost("/", request ->
+                request.respondWith(response ->
+                    response.setBodyJson(new Pojo("hello POST"))
+                )
+            )
+            .httpGet("/v1/foo/:who/fifi", request -> {
+                String who = request.pathParamOption("who").orElse("unknown");
+                request.respondWith(response ->
+                    response.setBodyJson(new Pojo(String.format("hello GET foo - who = %s", who)))
+                );
+            })
+            .webSocket("/websocket", (webSocket) -> {
+                webSocket.sendText("hello");
+                webSocket.receiveText(msg -> System.out.printf("received message = %s%n", msg));
+            })
+            .listenAndServeBlocking();
     }
 
     static class Pojo {

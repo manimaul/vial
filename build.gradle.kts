@@ -49,7 +49,6 @@ allprojects {
     val nettyVersion="4.1.66.Final"
     val nettyBoringSslVersion="2.0.40.Final"
     val typesafeConfigVersion="1.4.1"
-    val jacksonVersion="2.12.4"
 
     // testing dependencies
     val hamcrestVersion="1.3"
@@ -73,9 +72,7 @@ allprojects {
         api("org.codehaus.groovy:groovy-all:$groovyVersion")
 
         // Jackson
-        api("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-        api("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
-        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0-rc1")
 
         api("com.typesafe:config:$typesafeConfigVersion")
 

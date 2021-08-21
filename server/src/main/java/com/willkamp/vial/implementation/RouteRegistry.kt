@@ -12,7 +12,7 @@ internal class RouteRegistry {
 
     fun registerRoute(method: HttpMethod,
                       routePattern: String,
-                      handler: RequestHandler) {
+                      handler: Consumer<Request>) {
         routeHandlers.computeIfAbsent(method) {
             mutableListOf()
         }.add(Meta(Route.build(routePattern), handler))
@@ -45,7 +45,7 @@ internal class RouteRegistry {
 
     internal data class Meta(
             val route: Route? = null,
-            val handler: RequestHandler,
+            val handler: Consumer<Request>,
     )
 
     internal data class WSMeta(

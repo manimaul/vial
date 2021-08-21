@@ -21,45 +21,45 @@ interface VialServer : ServerInitializer {
         }
     }
 
-    fun request(method: HttpMethod, route: String, handler: RequestHandler): VialServer
+    fun request(method: HttpMethod, route: String, handler: Consumer<Request>): VialServer
 
     fun staticContent(rootDirectory: File): VialServer
 
     fun webSocket(route: String, senderReady: Consumer<WebSocket>) : VialServer
 
-    fun httpOptions(route: String, handler: RequestHandler): VialServer {
+    fun httpOptions(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.OPTIONS, route, handler)
     }
 
-    fun httpGet(route: String, handler: RequestHandler): VialServer {
+    fun httpGet(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.GET, route, handler)
     }
 
-    fun httpHead(route: String, handler: RequestHandler): VialServer {
+    fun httpHead(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.HEAD, route, handler)
     }
 
-    fun httpPost(route: String, handler: RequestHandler): VialServer {
+    fun httpPost(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.POST, route, handler)
     }
 
-    fun httpPut(route: String, handler: RequestHandler): VialServer {
+    fun httpPut(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.PUT, route, handler)
     }
 
-    fun httpPatch(route: String, handler: RequestHandler): VialServer {
+    fun httpPatch(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.PATCH, route, handler)
     }
 
-    fun httpDelete(route: String, handler: RequestHandler): VialServer {
+    fun httpDelete(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.DELETE, route, handler)
     }
 
-    fun httpTrace(route: String, handler: RequestHandler): VialServer {
+    fun httpTrace(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.TRACE, route, handler)
     }
 
-    fun httpConnect(route: String, handler: RequestHandler): VialServer {
+    fun httpConnect(route: String, handler: Consumer<Request>): VialServer {
         return request(HttpMethod.CONNECT, route, handler)
     }
 }

@@ -1,6 +1,7 @@
 package com.willkamp.vial.api
 
 import java.util.*
+import java.util.function.Consumer
 import kotlin.collections.Map.Entry
 
 interface Request {
@@ -17,4 +18,5 @@ interface Request {
         return Optional.ofNullable(pathParam(key))
     }
     fun <T> bodyJson(clazz: Class<T>): T?
+    fun respondWith(responseBuilder: Consumer<ResponseBuilder>)
 }

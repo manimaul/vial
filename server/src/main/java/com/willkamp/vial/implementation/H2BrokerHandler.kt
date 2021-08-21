@@ -72,8 +72,8 @@ internal class H2BrokerHandler(
                         request.setPathParamGroupSupplier {
                             m.route?.groups(headers.path()) ?: emptyMap()
                         }
-                        val response = meta.handler(request, ResponseImpl(ctx.alloc())) as ResponseImpl
-                        writeResponse(ctx, streamId, response)
+                        meta.handler.accept(request)
+                        writeResponse(ctx, streamId, request.buildResponse(ResponseImpl(ctx.alloc())))
                     }
 
 
@@ -119,8 +119,8 @@ internal class H2BrokerHandler(
                 request.setPathParamGroupSupplier {
                     meta.route?.groups(request.path) ?: emptyMap()
                 }
-                val response = meta.handler(request, ResponseImpl(ctx.alloc())) as ResponseImpl
-                writeResponse(ctx, streamId, response)
+                meta.handler.accept(request)
+                writeResponse(ctx, streamId, request.buildResponse(ResponseImpl(ctx.alloc())))
                 return processed
             } catch (e: Exception) {
                 log.error("Error in handling Route", e)

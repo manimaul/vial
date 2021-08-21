@@ -12,7 +12,7 @@ internal class VialServerImpl internal constructor(
         private val routeRegistry: RouteRegistry) : VialServer, NettyInitializer(vialChannelInitializer, channelConfig, vialConfig) {
     private val log = logger()
 
-    override fun request(method: HttpMethod, route: String, handler: Function2<Request, ResponseBuilder, ResponseBuilder>): VialServer {
+    override fun request(method: HttpMethod, route: String, handler: Consumer<Request>): VialServer {
         routeRegistry.registerRoute(method, route, handler)
         return this
     }

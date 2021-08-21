@@ -223,22 +223,22 @@ public class ServerIntegrationTest {
 
         Closeable start() throws Exception {
             return VialServer.Companion.create()
-                    .httpGet("/", ((request, responseBuilder) -> responseBuilder.setBodyText("GET /")))
+                    .httpGet("/", request -> request.respondWith(responseBuilder -> responseBuilder.setBodyText("GET /")))
                     .httpPost(
                             "/",
-                            ((request, responseBuilder) ->
-                                    responseBuilder.setBodyHtml("<html><body>POST /</body></html>")))
+                            request ->
+                                    request.respondWith(responseBuilder -> responseBuilder.setBodyHtml("<html><body>POST /</body></html>")))
                     .httpGet(
                             "/foo/:param1/bar/:param2",
-                            ((request, responseBuilder) -> {
+                            request -> {
                                 String param1 = request.pathParamOption("param1").orElse("unknown");
                                 String param2 = request.pathParamOption("param2").orElse("unknown");
-                                return responseBuilder.setBodyText(
-                                        String.format("GET /foo/%s/bar/%s", param1, param2));
-                            }))
+                                request.respondWith(responseBuilder -> responseBuilder.setBodyText(
+                                        String.format("GET /foo/%s/bar/%s", param1, param2)));
+                            })
                     .httpGet(
                             "/query",
-                            ((request, responseBuilder) -> {
+                            request -> {
                                 val builder = Queries.builder()
                                         .queries(new HashMap<>());
 
@@ -247,17 +247,16 @@ public class ServerIntegrationTest {
                                         builder.queries.computeIfAbsent(k, (qq) -> new HashSet<>()).add(v);
                                     }
                                 }
-
-                                return responseBuilder.setBodyJson(builder.build());
-                            }))
+                                request.respondWith(responseBuilder -> responseBuilder.setBodyJson(builder.build()));
+                            })
                     .httpGet(
                             "/styles/v1/:user/:mapId/sprite@2x.json",
-                            ((request, responseBuilder) -> {
+                            request -> {
                                 String user = request.pathParamOption("user").orElse("unknown");
                                 String mapId = request.pathParamOption("mapId").orElse("unknown");
-                                return responseBuilder.setBodyJson(
-                                        Sprite.builder().user(user).mapId(mapId).build());
-                            }))
+                                request.respondWith(responseBuilder ->  responseBuilder.setBodyJson(
+                                        Sprite.builder().user(user).mapId(mapId).build()));
+                            })
                     .webSocket("/websocket", webSocket -> {
                         webSocket.sendText("hello ws");
                         webSocket.receiveText(msg -> receivedWsMessages.add(msg));

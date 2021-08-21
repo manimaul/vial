@@ -1,6 +1,7 @@
 package com.willkamp.vial.implementation
 
 import com.willkamp.vial.api.Request
+import com.willkamp.vial.api.ResponseBuilder
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.CompositeByteBuf
@@ -9,6 +10,7 @@ import io.netty.handler.codec.http2.Http2Headers
 import io.netty.util.CharsetUtil
 import java.io.IOException
 import java.util.*
+import java.util.function.Consumer
 import kotlin.collections.Map.Entry
 import java.util.stream.Collectors
 import java.util.stream.StreamSupport
@@ -26,6 +28,7 @@ internal class RequestImpl private constructor(
     }
     private var pathParamGroupSupplier: () -> Map<String, String> = { emptyMap() }
     private val log = logger()
+    private var responseBuilder: Consumer<ResponseBuilder>? = null
 
 
     override val bodyText: String?
@@ -51,6 +54,10 @@ internal class RequestImpl private constructor(
 
         }
         return null
+    }
+
+    override fun respondWith(responseBuilder: Consumer<ResponseBuilder>) {
+        this.responseBuilder = responseBuilder
     }
 
     override fun headers(): Iterable<Entry<CharSequence, CharSequence>> {
@@ -81,6 +88,11 @@ internal class RequestImpl private constructor(
     fun setPathParamGroupSupplier(supplier: () -> Map<String, String>) {
         pathParamGroups = null
         pathParamGroupSupplier = supplier
+    }
+
+    fun buildResponse(responseImpl: ResponseImpl) : ResponseImpl {
+        responseBuilder?.accept(responseImpl)
+        return responseImpl
     }
 
     companion object {

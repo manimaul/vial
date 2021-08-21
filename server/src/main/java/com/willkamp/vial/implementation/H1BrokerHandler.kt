@@ -21,7 +21,8 @@ internal class H1BrokerHandler(
                 request.setPathParamGroupSupplier {
                     it.route?.groups(msg.uri()) ?: emptyMap()
                 }
-                val impl = it.handler.invoke(request, ResponseImpl(ctx.alloc())) as ResponseImpl
+                it.handler.accept(request)
+                val impl = request.buildResponse(ResponseImpl(ctx.alloc()))
                 impl.buildFullH1Response()
             } ?: ResponseImpl(ctx.alloc())
                     .setStatus(HttpResponseStatus.NOT_FOUND)
