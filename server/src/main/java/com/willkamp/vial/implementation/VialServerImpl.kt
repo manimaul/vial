@@ -3,6 +3,8 @@ package com.willkamp.vial.implementation
 import com.willkamp.vial.api.*
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelOption
+import io.netty.channel.WriteBufferWaterMark
 import io.netty.handler.codec.http.HttpMethod
 import java.io.Closeable
 import java.io.File
@@ -56,6 +58,18 @@ class VialServerImpl internal constructor(
                     .group(channelConfig.bossEventLoopGroup, channelConfig.eventLoopGroup)
                     .channel(channelConfig.channelClass)
                     .localAddress(socketAddress)
+                    .childOption(ChannelOption.TCP_NODELAY, true) // turn off Nagle's Algo
+                    .option(
+                            ChannelOption.SO_BACKLOG,
+                            vialConfig.maxConnBacklog) // max connection queue backlog size
+                    .option(
+                            ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                            vialConfig.connTimeout) // connection timeout
+                    .option( // write task queue high and low watermarks
+                            ChannelOption.WRITE_BUFFER_WATER_MARK,
+                            WriteBufferWaterMark(
+                                    vialConfig.writeBufferQueueSizeBytesLow,
+                                    vialConfig.writeBufferQueueSizeBytesHigh))
                     .childHandler(vialChannelInitializer)
             val cf = bootstrap.bind()
             channelFuture = cf

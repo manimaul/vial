@@ -50,7 +50,6 @@ allprojects {
     val nettyBoringSslVersion="2.0.40.Final"
     val typesafeConfigVersion="1.4.1"
     val jacksonVersion="2.12.4"
-    val guavaVersion="30.1.1-jre"
 
     // testing dependencies
     val hamcrestVersion="1.3"
@@ -60,26 +59,25 @@ allprojects {
     dependencies {
         // Kotlin
         api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-        implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+        api(platform("org.jetbrains.kotlin:kotlin-bom"))
 
         // Netty
-        implementation("io.netty:netty-all:$nettyVersion")
-        implementation("io.netty:netty-tcnative-boringssl-static:$nettyBoringSslVersion")
-        implementation("io.netty:netty-codec-http:$nettyVersion")
+        api("io.netty:netty-all:$nettyVersion")
+        api("io.netty:netty-tcnative-boringssl-static:$nettyBoringSslVersion")
+        api("io.netty:netty-codec-http:$nettyVersion")
 
         // Logging
-        implementation("org.slf4j:slf4j-api:$slf4jVersion")
-        implementation("ch.qos.logback:logback-core:$logbackVersion")
-        implementation("ch.qos.logback:logback-classic:$logbackVersion")
-        implementation("org.codehaus.groovy:groovy-all:$groovyVersion")
+        api("org.slf4j:slf4j-api:$slf4jVersion")
+        api("ch.qos.logback:logback-core:$logbackVersion")
+        api("ch.qos.logback:logback-classic:$logbackVersion")
+        api("org.codehaus.groovy:groovy-all:$groovyVersion")
 
         // Jackson
-        implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-        implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+        api("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        api("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
+        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-        implementation("com.google.guava:guava:$guavaVersion")
-        implementation("com.typesafe:config:$typesafeConfigVersion")
+        api("com.typesafe:config:$typesafeConfigVersion")
 
         // JUnit5
         testImplementation(platform("org.junit:junit-bom:$junitVersion"))
