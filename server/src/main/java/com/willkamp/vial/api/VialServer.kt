@@ -23,6 +23,8 @@ interface VialServer : ServerInitializer {
 
     fun request(method: HttpMethod, route: String, handler: Consumer<Request>): VialServer
 
+    fun addHandler(handler: EndPointHandler) = request(handler.method, handler.route, handler::handle)
+
     fun staticContent(rootDirectory: File): VialServer
 
     fun webSocket(route: String, senderReady: Consumer<WebSocket>) : VialServer
