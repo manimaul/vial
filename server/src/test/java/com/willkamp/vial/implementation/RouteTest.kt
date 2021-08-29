@@ -38,6 +38,17 @@ class RouteTest {
 
     @Test
     @Throws(Exception::class)
+    fun testMatchesFileExtension() {
+        val route = Route.build("/api/font/:filename")
+        val path = "/api/font/sans.pbf"
+        assertTrue(route.matches(path))
+        val groups = route.groups(path)
+        assertEquals(setOf("filename"), groups.keys)
+        assertEquals("sans.pbf", groups["filename"])
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testMatchesAny() {
         val matches1 = Route.build(".*")
         assertTrue(matches1.matches("/api/people/jeff"))

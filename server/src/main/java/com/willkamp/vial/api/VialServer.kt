@@ -19,6 +19,8 @@ interface VialServer : ServerInitializer {
         fun customServer(channelInitializer: ChannelHandler) : ServerInitializer  {
             return Assembly.createCustomInitializer(channelInitializer)
         }
+
+        val jsonMapper = Assembly.objectMapper
     }
 
     fun request(method: HttpMethod, route: String, handler: Consumer<Request>): VialServer

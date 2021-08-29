@@ -1,6 +1,6 @@
 package com.willkamp.vial.implementation
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import com.willkamp.vial.api.ServerInitializer
@@ -10,14 +10,15 @@ import io.netty.channel.ChannelHandler
 
 internal object Assembly {
 
-    val objectMapper: ObjectMapper by lazy {
+    val objectMapper: JsonMapper by lazy {
         jsonMapper {
             addModule(kotlinModule())
         }
     }
 
     private fun createVialChannelInitializer(vialConfig: VialConfig, sslContextFactory: SslContextFactory, routeRegistry: RouteRegistry): VialChannelInitializer {
-        return VialChannelInitializer(sslContextFactory.createSslContext(), vialConfig, routeRegistry)
+        val sslContext = if (vialConfig.useTls) sslContextFactory.createSslContext() else null
+        return VialChannelInitializer(sslContext, vialConfig, routeRegistry)
     }
 
     fun createVialServer(): VialServer {
