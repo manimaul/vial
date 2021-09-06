@@ -11,5 +11,5 @@ github_token=<your_token>
 #### Tag release and publish
 
 ```
-$./gradlew :server:release
+$./gradlew release
 ```
