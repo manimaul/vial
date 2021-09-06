@@ -34,6 +34,14 @@ internal class RequestImpl private constructor(
     override val bodyText: String?
         get() = body?.toString(CharsetUtil.UTF_8)
 
+    override val bodyBin: ByteArray?
+        get() {
+            return body?.let { bb ->
+                bb.resetReaderIndex()
+                ByteArray(bb.readableBytes()).also { bb.readBytes(it) }
+            }
+        }
+
     init {
         this.body = alloc.compositeBuffer()
     }

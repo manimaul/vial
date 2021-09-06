@@ -6,6 +6,7 @@ import kotlin.collections.Map.Entry
 
 interface Request {
     val bodyText: String?
+    val bodyBin: ByteArray?
     fun headers(): Iterable<Entry<CharSequence, CharSequence>>
     fun pathParam(key: String): String?
     fun queryParams(key: String): List<String>

@@ -44,7 +44,7 @@ public class ServerIntegrationTest {
         OkHttpClient client = OkHttpUnsafe.getUnsafeClient(Protocol.HTTP_1_1, Protocol.HTTP_2);
         final CountDownLatch latch = new CountDownLatch(1);
         final List<String> clientRecievedMessages = new ArrayList<>();
-        client.newWebSocket(new Request.Builder().url("https://127.0.0.1:8443/websocket").get().build(), new WebSocketListener() {
+        client.newWebSocket(new Request.Builder().url("wss://127.0.0.1:8443/websocket?qq=aa").get().build(), new WebSocketListener() {
             @Override
             public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
                 clientRecievedMessages.add(text);
@@ -68,13 +68,15 @@ public class ServerIntegrationTest {
             }
         });
 
-        assertTrue(latch.await(5000, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
 
         assertEquals(1, testServer.receivedWsMessages.size());
         assertEquals("hello", testServer.receivedWsMessages.get(0));
 
         assertEquals(1, clientRecievedMessages.size());
         assertEquals("hello ws", clientRecievedMessages.get(0));
+        assertEquals(1, testServer.queryParams.keySet().size());
+        assertEquals("aa", testServer.queryParams.get("qq").get(0));
     }
 
     @ParameterizedTest
@@ -220,6 +222,7 @@ public class ServerIntegrationTest {
 
     static class TestServer {
         ArrayList<String> receivedWsMessages = new ArrayList<>();
+        Map<String, List<String>> queryParams = new HashMap<>();
 
         Closeable start() throws Exception {
             return VialServer.Companion.create()
@@ -257,9 +260,20 @@ public class ServerIntegrationTest {
                                 request.respondWith(responseBuilder ->  responseBuilder.setBodyJson(
                                         Sprite.builder().user(user).mapId(mapId).build()));
                             })
-                    .webSocket("/websocket", webSocket -> {
-                        webSocket.sendText("hello ws");
+                    .webSocket("/websocket/bar", webSocket -> {
+                        webSocket.queryKeys().forEach(key -> queryParams.computeIfAbsent(key, (k) -> new ArrayList<>()).addAll(webSocket.queryParams(key)));
                         webSocket.receiveText(msg -> receivedWsMessages.add(msg));
+                        webSocket.sendText("hello ws bar");
+                    })
+                    .webSocket("/websocket", webSocket -> {
+                        webSocket.queryKeys().forEach(key -> queryParams.computeIfAbsent(key, (k) -> new ArrayList<>()).addAll(webSocket.queryParams(key)));
+                        webSocket.receiveText(msg -> receivedWsMessages.add(msg));
+                        webSocket.sendText("hello ws");
+                    })
+                    .webSocket("/websocket/foo", webSocket -> {
+                        webSocket.queryKeys().forEach(key -> queryParams.computeIfAbsent(key, (k) -> new ArrayList<>()).addAll(webSocket.queryParams(key)));
+                        webSocket.receiveText(msg -> receivedWsMessages.add(msg));
+                        webSocket.sendText("hello ws foo");
                     })
                     .listenAndServe()
                     .get();

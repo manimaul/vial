@@ -1,8 +1,17 @@
 package com.willkamp.vial.api
 
+import java.util.*
 import java.util.function.Consumer
 
 interface WebSocket {
+    val uri: String?
+    fun headers(): Iterable<Map.Entry<CharSequence, CharSequence>>
+    fun queryParams(key: String): List<String>
+    fun queryKeys(): Set<String>
+    fun queryParam(key: String): String?
+    fun queryParamOption(key: String): Optional<String> {
+        return Optional.ofNullable(queryParam(key))
+    }
     fun send(message: WebSocketMessage)
     fun sendText(message: String) {
         send(WebSocketTextMessage(message))

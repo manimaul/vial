@@ -6,6 +6,7 @@ import io.netty.channel.ChannelPipeline
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpServerCodec
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolConfig
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import io.netty.handler.ssl.SslContext
@@ -36,14 +37,23 @@ internal class VialChannelInitializer(
         )
     }
 
+    private fun serverConfig(path: String) = WebSocketServerProtocolConfig.newBuilder()
+            .websocketPath(path)
+            .allowExtensions(true)
+            .maxFramePayloadLength(vialConfig.maxContentLength)
+            .allowMaskMismatch(false)
+            .checkStartsWith(true)
+            .withUTF8Validator(true)
+            .build()
+
     private fun configureH1(pipeline: ChannelPipeline) {
         pipeline
                 .addLast("server codec duplex", HttpServerCodec())
                 .addLast("message size limit aggregator", HttpObjectAggregator(vialConfig.maxContentLength))
                 .addLast("websocket compression", WebSocketServerCompressionHandler())
 
-        routeRegistry.wsHandlers.forEach {
-            pipeline.addLast(WebSocketServerProtocolHandler(it.route, null, true, vialConfig.maxContentLength))
+        routeRegistry.baseWsRoutes().forEach {
+            pipeline.addLast(WebSocketServerProtocolHandler(serverConfig(it)))
         }
 
         pipeline
